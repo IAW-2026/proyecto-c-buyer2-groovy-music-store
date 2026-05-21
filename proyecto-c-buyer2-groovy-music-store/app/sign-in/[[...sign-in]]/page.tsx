@@ -2,9 +2,28 @@ import { SignIn } from "@clerk/nextjs";
 
 export default function SignInPage() {
   return (
-    // Centramos el formulario de Clerk en el medio de la pantalla con Tailwind
-    <main className="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-zinc-950 p-4">
-      <SignIn />
+    // Cambio de color de fondo
+    <main className="flex min-h-screen items-center justify-center bg-[var(--bg-retro)] p-4">
+      
+      {/*  Personalizacion del componente de Clerk*/}
+      <SignIn 
+        appearance={{
+          variables: {
+            colorPrimary: '#E4572E', 
+            colorBackground: '#FAF8F5', 
+            colorText: '#2E2E2E', 
+            colorTextSecondary: '#6D4C41', 
+            borderRadius: '0.75rem', 
+          },
+          elements: {
+          
+            card: "border border-[#DCDCDC] shadow-md", 
+            formButtonPrimary: "font-medium hover:opacity-90 transition-opacity shadow-none",
+            footerActionLink: "text-[#E4572E] hover:text-[#c44321] font-semibold", 
+          }
+        }}
+      />
+
     </main>
   );
 }

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import GaleriaInteractiva from '@/app/components/GaleriaInteractiva'
+import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
+import BotonAgregarCarrito from '@/app/ui/BotonAgregarCarrito'
 
 type Product = {
     id: number;
@@ -37,7 +38,6 @@ const sampleProducts: Product[] = [
     }
 ]
 
-
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
     
     // Resolvemos la URL
@@ -58,12 +58,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
             <div className="max-w-5xl mx-auto bg-[var(--panel-bg)] border border-[var(--divider)] rounded-xl shadow-sm p-6 md:p-10 flex flex-col md:flex-row gap-10">
                 
-                {/* COLUMNA IZQUIERDA: Inyectamos el Client Component y le pasamos el arreglo de fotos */}
+                {/* COLUMNA IZQUIERDA */}
                 <div className="w-full md:w-1/2">
                     <GaleriaInteractiva imagenes={product.imagenes} />
                 </div>
 
-                {/* COLUMNA DERECHA: Todo tu diseño técnico original intacto */}
+                {/* COLUMNA DERECHA */}
                 <div className="w-full md:w-1/2 flex flex-col">
                     <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-dark)] mb-2">{product.titulo}</h1>
                     {product.artista && <p className="text-xl text-[var(--text-medium)] mb-6">{product.artista}</p>}
@@ -94,12 +94,10 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                     </div>
 
                     <div className="mt-auto">
-                        <button 
-                            className="w-full bg-[var(--accent-terracotta)] hover:opacity-90 transition-opacity text-white font-bold py-4 rounded-lg text-lg disabled:opacity-40 disabled:cursor-not-allowed"
-                            disabled={product.stock === 0}
-                        >
-                            {product.stock > 0 ? 'Agregar al carrito' : 'Sin stock'}
-                        </button>
+                        <BotonAgregarCarrito 
+                            productoId={product.id} 
+                            stock={product.stock} 
+                        />
                     </div>
                 </div>
             </div>

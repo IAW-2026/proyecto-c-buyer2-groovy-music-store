@@ -1,6 +1,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { SignOutButton } from "@clerk/nextjs"
+// Importamos el componente de servidor del carrito
+import CartServer from '@/app/ui/CartServer' 
 
 // Tipo de datos liviano para no traer info de la BD de mas
 type ProductSummary = {
@@ -11,7 +13,7 @@ type ProductSummary = {
     carpeta_imagenes: string
 }
 
-//arreglo simulado
+// Arreglo simulado (Coincide con los IDs de nuestro fakeApiProducts en CartServer)
 const sampleProducts: ProductSummary[] = [
     { 
         id: 1, 
@@ -47,7 +49,7 @@ export default function CatalogPage() {
     return (
         <main style={{ padding: 40, fontFamily: 'Inter, system-ui, sans-serif', background: 'var(--bg-retro)', minHeight: '100vh' }}>
             
-            {/* BARRA DE NAVEGACIÓN SUPERIOR AGREGADA */}
+            {/* BARRA DE NAVEGACIÓN SUPERIOR */}
             <nav style={{ 
                 display: 'flex', 
                 justifyContent: 'flex-end', 
@@ -57,21 +59,12 @@ export default function CatalogPage() {
                 borderBottom: '1px solid var(--divider)', 
                 marginBottom: 32 
             }}>
-                {/* Botón Carrito con ícono SVG */}
-                <button style={{ 
-                    background: 'none', border: 'none', cursor: 'pointer', 
-                    display: 'flex', alignItems: 'center', gap: 8, 
-                    color: 'var(--text-dark)', fontSize: 16, fontWeight: 500 
-                }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                    Carrito
-                </button>
+                {/* INTEGRACIÓN: Aquí anidamos el Server Component del carrito. 
+                  Next.js resolverá esta consulta a Neon y la "hidratación" asincrónica de forma nativa.
+                */}
+                <CartServer />
 
-                {/* Botón Salir con Clerk y su ícono SVG */}
+                {/* Botón Salir con Clerk */}
                 <SignOutButton redirectUrl="/">
                     <button style={{ 
                         background: 'none', border: 'none', cursor: 'pointer', 

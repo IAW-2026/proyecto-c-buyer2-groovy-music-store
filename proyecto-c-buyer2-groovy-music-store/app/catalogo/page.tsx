@@ -2,53 +2,35 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { SignOutButton } from "@clerk/nextjs"
 
-type Product = {
+// Tipo de datos liviano para no traer info de la BD de mas
+type ProductSummary = {
     id: number
-    seller_id: string
     titulo: string
     artista: string
-    formato: string
-    condicion: string
-    stock: number
-    genero: string
     precio: number
     carpeta_imagenes: string
 }
 
-const sampleProducts: Product[] = [
+//arreglo simulado
+const sampleProducts: ProductSummary[] = [
     { 
         id: 1, 
-        seller_id: 'seller_123',
         titulo: 'Groovy Vinyl 1', 
         artista: 'Artist A', 
-        formato: 'Vinilo LP',
-        condicion: 'Nuevo',
-        stock: 5,
-        genero: 'Rock',
         precio: 19.99, 
         carpeta_imagenes: '/placeholder-record.png' 
     },
     { 
         id: 2, 
-        seller_id: 'seller_123',
         titulo: 'Groovy Vinyl 2', 
         artista: 'Artist B', 
-        formato: 'Vinilo 7"',
-        condicion: 'Usado',
-        stock: 2,
-        genero: 'Jazz',
         precio: 24.50, 
         carpeta_imagenes: '/placeholder-record.png' 
     },
     { 
         id: 3, 
-        seller_id: 'seller_456',
         titulo: 'Groovy Vinyl 3', 
         artista: 'Artist C', 
-        formato: 'Cassette',
-        condicion: 'Nuevo',
-        stock: 10,
-        genero: 'Pop',
         precio: 15.00, 
         carpeta_imagenes: '/placeholder-record.png' 
     },
@@ -142,7 +124,7 @@ export default function CatalogPage() {
                                     ${p.precio.toFixed(2)}
                                 </div>
                                 <span style={{ background: 'var(--accent-terracotta)', color: 'white', padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 600 }}>
-                                    Agregar al carrito
+                                    Ver detalles
                                 </span>
                             </div>
                         </Link>

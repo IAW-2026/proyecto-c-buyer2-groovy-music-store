@@ -1,6 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link' 
 import NavBar from '@/app/ui/NavBar'
+import { currentUser } from "@clerk/nextjs/server"
+import { redirect } from "next/navigation"
+import prisma from "@/app/lib/prisma"
+
 
 // Tipo de datos liviano para no traer info de la BD de mas
 type ProductSummary = {
@@ -41,8 +45,33 @@ export const metadata = {
     description: 'Página principal del catálogo de productos',
 }
 
-export default function CatalogPage() {
+// Transformamos el componente en async para poder usar await
+export default async function CatalogPage() {
     const products = sampleProducts
+
+    // 1. Obtenemos la info del usuario desde Clerk
+    const user = await currentUser();
+
+    // 2. Si no está logueado, lo redirigimos
+    if (!user) {
+        redirect('/sign-in');
+    }
+
+    // 3. Sincronizamos con el modelo "Usuario" de prisma
+    await prisma.usuario.upsert({
+        where: { 
+            clerk_id: user.id 
+        },
+        update: {
+            mail: user.emailAddresses[0]?.emailAddress ?? "",
+            nombre: user.firstName ?? "Usuario",
+        },
+        create: {
+            clerk_id: user.id,
+            mail: user.emailAddresses[0]?.emailAddress ?? "",
+            nombre: user.firstName ?? "Usuario",
+        }
+    });
 
     return (
         <main className="min-h-screen bg-background font-dm pb-20">
@@ -63,7 +92,10 @@ export default function CatalogPage() {
             <div className="max-w-7xl mx-auto px-8 mt-10">
                 <header className="mb-10">
                     <h1 className="font-syne m-0 text-4xl font-semibold text-foreground">Catálogo</h1>
-                    <p className="font-dm mt-2 mb-0 text-foreground/70 text-base">Mira nuestros productos más populares</p>
+                    {/* Mensaje de bienvenida personalizado con el nombre del usuario */}
+                    <p className="font-dm mt-2 mb-0 text-foreground/70 text-base">
+                        ¡Hola {user.firstName || 'coleccionista'}! Mira nuestros productos más populares
+                    </p>
                     <div className="w-20 h-1 bg-primary mt-4 rounded-full"></div>
                 </header>
 

@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { SignOutButton } from "@clerk/nextjs"
-import { ArrowLeftIcon, MagnifyingGlassIcon, ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 // Tus componentes
 import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
 import BotonAgregarCarrito from '@/app/ui/BotonAgregarCarrito'
 import CartServer from '@/app/ui/CartServer'
+import NavBar from '@/app/ui/NavBar'
 
 type Product = {
     id: number;
@@ -57,42 +57,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <main className="min-h-screen bg-background font-dm pb-20">
             
             {/* BARRA DE NAVEGACIÓN SUPERIOR  */}
-            <nav className="flex items-center justify-between w-full px-4 md:px-8 py-4 bg-primary text-white">
-                
-                {/* COLUMNA IZQUIERDA: En desktop da balance (flex-1) con elementos invisibles. En móvil desaparece para dar espacio. */}
-                <div className="hidden md:flex flex-1 gap-8 opacity-0 pointer-events-none">
-                    <span className="text-xs">Vinilos</span>
-                </div>
-
-                {/* COLUMNA CENTRAL: El logo. shrink-0 para que el texto no se aplaste */}
-                <div className="flex shrink-0">
-                    <Link href="/" className="font-cormorant text-2xl md:text-3xl font-light tracking-[0.15em] md:tracking-[0.55em] select-none">
-                        GROOVY
-                    </Link>
-                </div>
-
-                {/* COLUMNA DERECHA: tira el contenido a la derecha (justify-end) */}
-                <div className="flex flex-1 items-center justify-end gap-3 md:gap-6">
-                    
-                    {/* Búsqueda */}
-                    <button className="hover:opacity-80 transition-opacity p-1">
-                        <MagnifyingGlassIcon className="w-5 h-5" />
-                    </button>
-
-                    {/* Botón Salir con Clerk */}
-                    <SignOutButton redirectUrl="/">
-                        <button className="flex items-center hover:opacity-80 transition-opacity text-sm font-medium tracking-wide cursor-pointer bg-transparent border-none text-white p-1" title="Salir">
-                            <ArrowRightEndOnRectangleIcon className="w-5 h-5" />
-                        </button>
-                    </SignOutButton>
-
-                    {/* Componente del Carrito */}
-                    <div className="p-1">
-                        <CartServer />
-                    </div>
-                    
-                </div>
-            </nav>
+            <NavBar />
 
             {/* BARRA DE NAVEGACIÓN SECUNDARIA  */}
             <div className="flex items-center px-8 py-3 bg-foreground text-white/50 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">

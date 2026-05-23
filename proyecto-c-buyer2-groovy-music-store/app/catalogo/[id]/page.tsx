@@ -57,32 +57,40 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         <main className="min-h-screen bg-background font-dm pb-20">
             
             {/* BARRA DE NAVEGACIÓN SUPERIOR  */}
-            <nav className="flex items-center justify-between px-5 md:px-8 py-4 md:py-5 bg-primary text-white relative">
+            <nav className="flex items-center justify-between w-full px-4 md:px-8 py-4 bg-primary text-white">
                 
+                {/* COLUMNA IZQUIERDA: En desktop da balance (flex-1) con elementos invisibles. En móvil desaparece para dar espacio. */}
+                <div className="hidden md:flex flex-1 gap-8 opacity-0 pointer-events-none">
+                    <span className="text-xs">Vinilos</span>
+                </div>
 
-                {/* Logo Central  */}
-                <div className="md:absolute md:left-1/2 md:-translate-x-1/2">
-                    <Link href="/" className="font-cormorant text-2xl md:text-3xl font-light tracking-[0.25em] md:tracking-[0.55em] select-none">
+                {/* COLUMNA CENTRAL: El logo. shrink-0 para que el texto no se aplaste */}
+                <div className="flex shrink-0">
+                    <Link href="/" className="font-cormorant text-2xl md:text-3xl font-light tracking-[0.15em] md:tracking-[0.55em] select-none">
                         GROOVY
                     </Link>
                 </div>
 
-                {/* Íconos Derechos */}
-                <div className="flex items-center gap-4 md:gap-6 ml-auto">
+                {/* COLUMNA DERECHA: tira el contenido a la derecha (justify-end) */}
+                <div className="flex flex-1 items-center justify-end gap-3 md:gap-6">
+                    
                     {/* Búsqueda */}
-                    <button className="hover:opacity-80 transition-opacity">
-                        <MagnifyingGlassIcon className="w-5 h-5 md:w-5 md:h-5" />
+                    <button className="hover:opacity-80 transition-opacity p-1">
+                        <MagnifyingGlassIcon className="w-5 h-5" />
                     </button>
 
                     {/* Botón Salir con Clerk */}
                     <SignOutButton redirectUrl="/">
-                        <button className="flex items-center gap-2 hover:opacity-80 transition-opacity text-sm font-medium tracking-wide cursor-pointer bg-transparent border-none text-white" title="Salir">
-                            <ArrowRightEndOnRectangleIcon className="w-5 h-5 md:w-5 md:h-5" />
+                        <button className="flex items-center hover:opacity-80 transition-opacity text-sm font-medium tracking-wide cursor-pointer bg-transparent border-none text-white p-1" title="Salir">
+                            <ArrowRightEndOnRectangleIcon className="w-5 h-5" />
                         </button>
                     </SignOutButton>
 
-                    {/* Componente del Carrito Original */}
-                    <CartServer />
+                    {/* Componente del Carrito */}
+                    <div className="p-1">
+                        <CartServer />
+                    </div>
+                    
                 </div>
             </nav>
 

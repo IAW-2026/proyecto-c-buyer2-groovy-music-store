@@ -5,38 +5,49 @@ import Link from "next/link";
 export default async function Home() {
   const { userId } = await auth(); 
 
-  //Si el usuario ya está logueado, lo mandamos directo al catálogo
+  // Si el usuario ya está logueado, lo mandamos directo al catálogo
   if (userId) {
     redirect('/catalogo'); 
   }
 
   // Si no está logueado:
   return (
-    <main className="flex min-h-screen flex-col p-6 bg-[var(--bg-retro)]">
+    <main className="min-h-screen bg-background font-dm flex flex-col">
       
-      <div className="flex h-20 shrink-0 items-end rounded-lg bg-[var(--accent-terracotta)] p-4 md:h-52 shadow-sm">
-         <h1 className="text-3xl font-bold text-white">Buyer App</h1>
-      </div>
-      
-      <div className="mt-4 flex grow flex-col gap-4 md:flex-row">
+      {/* BARRA DE NAVEGACIÓN SUPERIOR  */}
+      <nav className="flex items-center justify-center px-8 py-5 bg-primary text-white">
+        <div className="font-cormorant text-3xl font-light tracking-[0.55em] select-none">
+          GROOVY
+        </div>
+      </nav>
+
+      {/* CONTENIDO PRINCIPAL  */}
+      <div className="flex flex-grow items-center justify-center p-6">
         
-        <div className="flex flex-col justify-center gap-6 rounded-lg bg-[var(--panel-bg)] border border-[var(--divider)] shadow-sm px-6 py-10 md:w-2/5 md:px-20">
+        <div className="bg-card border border-border rounded-2xl shadow-sm p-10 md:p-14 max-w-lg w-full flex flex-col items-center text-center relative overflow-hidden">
           
-          <p className="text-[var(--text-dark)] text-xl md:text-2xl font-medium">
-            Bienvenido. Por favor, iniciá sesión para continuar.
+          {/* detalle decorativo arriba del cuadro */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-primary"></div>
+
+          <h1 className="font-syne text-3xl md:text-4xl font-bold text-foreground mb-3">
+            Bienvenido
+          </h1>
+          
+          <p className="font-dm text-foreground/70 mb-10 text-base">
+            Música física para coleccionistas apasionados. Por favor, iniciá sesión para explorar nuestro catálogo.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 mt-4">
+          <div className="flex flex-col sm:flex-row gap-4 w-full">
             <Link
               href="/sign-in"
-              className="flex items-center gap-5 self-start rounded-lg bg-[var(--accent-terracotta)] px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 md:text-base"
+              className="flex-1 bg-primary text-white rounded-full py-3.5 px-6 text-[13px] font-semibold tracking-[0.1em] uppercase transition-opacity hover:opacity-90 flex justify-center items-center"
             >
               Iniciar sesión
             </Link>
             
             <Link
               href="/sign-up"
-              className="flex items-center gap-5 self-start rounded-lg bg-[var(--text-medium)] px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90 md:text-base"
+              className="flex-1 bg-foreground text-background rounded-full py-3.5 px-6 text-[13px] font-semibold tracking-[0.1em] uppercase transition-opacity hover:opacity-90 flex justify-center items-center"
             >
               Registrarse
             </Link>
@@ -44,6 +55,7 @@ export default async function Home() {
 
         </div>
       </div>
+      
     </main>
   );
 }

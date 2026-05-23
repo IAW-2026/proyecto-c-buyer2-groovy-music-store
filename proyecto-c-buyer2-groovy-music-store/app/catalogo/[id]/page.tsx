@@ -1,7 +1,12 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { SignOutButton } from "@clerk/nextjs"
+import { ArrowLeftIcon, MagnifyingGlassIcon, ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline'
+
+// Tus componentes
 import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
 import BotonAgregarCarrito from '@/app/ui/BotonAgregarCarrito'
+import CartServer from '@/app/ui/CartServer'
 
 type Product = {
     id: number;
@@ -49,55 +54,104 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     if (!product) notFound()
 
     return (
-        <main className="min-h-screen p-6 md:p-12 bg-[var(--bg-retro)] font-sans">
-            <div className="max-w-5xl mx-auto mb-6">
-                <Link href="/catalogo" className="text-[var(--text-medium)] hover:text-[var(--accent-terracotta)] flex items-center gap-2 transition-colors">
-                    &larr; Volver al catálogo
+        <main className="min-h-screen bg-background font-dm pb-20">
+            
+            {/* BARRA DE NAVEGACIÓN SUPERIOR  */}
+            <nav className="flex items-center justify-between px-8 py-5 bg-primary text-white relative">
+                
+                {/* Links Izquierdos  */}
+                <div className="hidden md:flex gap-8 text-xs font-medium tracking-[0.15em] uppercase opacity-0 pointer-events-none">
+                    <span>Vinilos</span>
+                    <span>CDs</span>
+                    <span>Cassettes</span>
+                </div>
+
+                {/* Logo Central  */}
+                <div className="absolute left-1/2 -translate-x-1/2">
+                    <Link href="/" className="font-cormorant text-3xl font-light tracking-[0.55em] select-none">
+                        GROOVY
+                    </Link>
+                </div>
+
+                {/* Íconos Derechos */}
+                <div className="flex items-center gap-6 ml-auto">
+                    {/* Búsqueda */}
+                    <button className="hover:opacity-80 transition-opacity">
+                        <MagnifyingGlassIcon className="w-5 h-5" />
+                    </button>
+
+                    {/* Botón Salir con Clerk */}
+                    <SignOutButton redirectUrl="/">
+                        <button className="flex items-center gap-2 hover:opacity-80 transition-opacity text-sm font-medium tracking-wide cursor-pointer bg-transparent border-none text-white" title="Salir">
+                            <ArrowRightEndOnRectangleIcon className="w-5 h-5" />
+                        </button>
+                    </SignOutButton>
+
+                    {/* Componente del Carrito */}
+                    <CartServer />
+                </div>
+            </nav>
+
+            {/* BARRA DE NAVEGACIÓN SECUNDARIA  */}
+            <div className="flex items-center px-8 py-3 bg-foreground text-white/50 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
+                <Link href="/catalogo" className="flex items-center gap-2 hover:text-white transition-colors">
+                    <ArrowLeftIcon className="w-4 h-4" />
+                    <span>Volver al catálogo</span>
                 </Link>
             </div>
 
-            <div className="max-w-5xl mx-auto bg-[var(--panel-bg)] border border-[var(--divider)] rounded-xl shadow-sm p-6 md:p-10 flex flex-col md:flex-row gap-10">
-                
-                {/* COLUMNA IZQUIERDA */}
-                <div className="w-full md:w-1/2">
-                    <GaleriaInteractiva imagenes={product.imagenes} />
-                </div>
-
-                {/* COLUMNA DERECHA */}
-                <div className="w-full md:w-1/2 flex flex-col">
-                    <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-dark)] mb-2">{product.titulo}</h1>
-                    {product.artista && <p className="text-xl text-[var(--text-medium)] mb-6">{product.artista}</p>}
+            {/* CONTENIDO DEL PRODUCTO */}
+            <div className="max-w-5xl mx-auto mt-10 px-6 md:px-12">
+                <div className="bg-card border border-border rounded-xl shadow-sm p-6 md:p-10 flex flex-col md:flex-row gap-10">
                     
-                    <div className="text-3xl font-semibold text-[var(--text-dark)] mb-8">
-                        ${product.precio.toFixed(2)}
-                    </div>
-                    
-                    <div className="flex flex-col gap-4 mb-8 bg-[var(--bg-retro)] p-6 rounded-lg border border-[var(--divider)]">
-                        <div className="flex justify-between border-b border-[var(--divider)] pb-2">
-                            <span className="text-[var(--text-medium)]">Formato</span>
-                            <span className="font-medium text-[var(--text-dark)]">{product.formato}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-[var(--divider)] pb-2">
-                            <span className="text-[var(--text-medium)]">Condición</span>
-                            <span className="font-medium text-[var(--text-dark)]">{product.condicion}</span>
-                        </div>
-                        <div className="flex justify-between border-b border-[var(--divider)] pb-2">
-                            <span className="text-[var(--text-medium)]">Género</span>
-                            <span className="font-medium text-[var(--text-dark)]">{product.genero}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-[var(--text-medium)]">Disponibilidad</span>
-                            <span className={`font-semibold ${product.stock > 0 ? 'text-green-700' : 'text-red-600'}`}>
-                                {product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}
-                            </span>
-                        </div>
+                    {/* COLUMNA IZQUIERDA (Galería) */}
+                    <div className="w-full md:w-1/2">
+                        <GaleriaInteractiva imagenes={product.imagenes} />
                     </div>
 
-                    <div className="mt-auto">
-                        <BotonAgregarCarrito 
-                            productoId={product.id} 
-                            stock={product.stock} 
-                        />
+                    {/* COLUMNA DERECHA (Info del producto) */}
+                    <div className="w-full md:w-1/2 flex flex-col">
+                        <h1 className="font-syne text-3xl md:text-4xl font-bold text-foreground mb-2">
+                            {product.titulo}
+                        </h1>
+                        
+                        {product.artista && (
+                            <p className="font-dm text-xl text-foreground/70 mb-6">
+                                {product.artista}
+                            </p>
+                        )}
+                        
+                        <div className="font-syne text-3xl font-semibold text-foreground mb-8">
+                            ${product.precio.toFixed(2)}
+                        </div>
+                        
+                        <div className="flex flex-col gap-4 mb-8 bg-background p-6 rounded-lg border border-border font-dm">
+                            <div className="flex justify-between border-b border-border pb-2">
+                                <span className="text-foreground/70">Formato</span>
+                                <span className="font-medium text-foreground">{product.formato}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-border pb-2">
+                                <span className="text-foreground/70">Condición</span>
+                                <span className="font-medium text-foreground">{product.condicion}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-border pb-2">
+                                <span className="text-foreground/70">Género</span>
+                                <span className="font-medium text-foreground">{product.genero}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span className="text-foreground/70">Disponibilidad</span>
+                                <span className={`font-semibold tracking-wide ${product.stock > 0 ? 'text-green-700' : 'text-[#E25938]'}`}>
+                                    {product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="mt-auto">
+                            <BotonAgregarCarrito 
+                                productoId={product.id} 
+                                stock={product.stock} 
+                            />
+                        </div>
                     </div>
                 </div>
             </div>

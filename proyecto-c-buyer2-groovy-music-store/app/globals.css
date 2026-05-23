@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
+
 :root {
+  /* definicion de paleta */
   --bg-retro: #EDE3D1;
   --text-dark: #2E2E2E;
   --text-medium: #6D4C41;
@@ -9,11 +11,20 @@
   --divider: #DCDCDC;
 }
 
+/* Mapeo de variables para el tema de Tailwind */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Agregas tu paleta personalizada aquí */
+  --color-retro: var(--bg-retro);
+  --color-text-dark: var(--text-dark);
+  --color-text-medium: var(--text-medium);
+  --color-terracotta: var(--accent-terracotta);
+  --color-panel: var(--panel-bg);
+  --color-divider: var(--divider);
 }
 
 @media (prefers-color-scheme: dark) {

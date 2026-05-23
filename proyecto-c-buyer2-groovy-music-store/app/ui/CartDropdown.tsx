@@ -87,7 +87,31 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                             Vendedor: <span className="text-primary">{vendedorId}</span>
                                         </h4>
                                         
-
+                                        <ul className="list-none p-0 m-0 mb-3 flex flex-col gap-2.5">
+                                            {itemsDelVendedor.map((item) => (
+                                                <li key={item.producto_id} className="flex gap-3 items-center">
+                                                    <div className="w-11 h-11 relative bg-gray-200 rounded shrink-0 overflow-hidden">
+                                                        <Image 
+                                                            src={item.producto.imagenes[0] || '/placeholder-record.png'} 
+                                                            alt={item.producto.titulo} 
+                                                            fill 
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
+                                                    <div className="grow min-w-0">
+                                                        <p className="m-0 text-[13px] font-medium text-foreground truncate font-syne">
+                                                            {item.producto.titulo}
+                                                        </p>
+                                                        <p className="mt-0.5 mb-0 text-[11px] text-foreground/60 font-dm">
+                                                            Cantidad: {item.cantidad}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-[13px] font-semibold text-foreground font-syne">
+                                                        ${(item.producto.precio * item.cantidad).toFixed(2)}
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </ul>
                                         <div className="border-t border-border pt-3 flex flex-col gap-2">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-xs text-foreground/60 font-dm">Subtotal:</span>

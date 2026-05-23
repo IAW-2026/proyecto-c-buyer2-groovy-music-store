@@ -38,16 +38,15 @@ export default function BotonAgregarCarrito({ productoId, stock }: BotonProps) {
         botonColor = 'bg-gray-500';
         clasesExtra = 'opacity-80 cursor-wait';
     } else if (fueAgregado) {
-        botonTexto = '¡Producto agregado! ✓';
+        botonTexto = '¡Producto agregado!';
         botonColor = 'bg-green-600'; 
-        clasesExtra = 'opacity-100 cursor-default'; // <-- Esto asegura que el verde brille al 100%
+        clasesExtra = 'opacity-100 cursor-default'; 
     }
 
     return (
         <button 
             onClick={handleAgregar}
             disabled={stock === 0 || isPending || fueAgregado}
-            // Sacamos el disabled:opacity-40 de acá abajo y usamos nuestras variables
             className={`w-full transition-all text-white font-bold py-4 rounded-lg text-lg ${botonColor} ${clasesExtra}`}
         >
             {botonTexto}

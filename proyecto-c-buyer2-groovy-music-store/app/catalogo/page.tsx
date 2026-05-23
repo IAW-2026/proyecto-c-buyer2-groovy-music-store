@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { SignOutButton } from "@clerk/nextjs"
-// Importamos el componente de servidor del carrito
+import { MagnifyingGlassIcon, ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline'
 import CartServer from '@/app/ui/CartServer' 
 
 // Tipo de datos liviano para no traer info de la BD de mas
@@ -47,83 +47,86 @@ export default function CatalogPage() {
     const products = sampleProducts
 
     return (
-        <main style={{ padding: 40, fontFamily: 'Inter, system-ui, sans-serif', background: 'var(--bg-retro)', minHeight: '100vh' }}>
+        <main className="min-h-screen bg-background font-dm pb-20">
             
             {/* BARRA DE NAVEGACIÓN SUPERIOR */}
-            <nav style={{ 
-                display: 'flex', 
-                justifyContent: 'flex-end', 
-                alignItems: 'center', 
-                gap: 24, 
-                paddingBottom: 20, 
-                borderBottom: '1px solid var(--divider)', 
-                marginBottom: 32 
-            }}>
-                {/* INTEGRACIÓN: Aquí anidamos el Server Component del carrito. 
-                  Next.js resolverá esta consulta a Neon y la "hidratación" asincrónica de forma nativa.
-                */}
-                <CartServer />
+            <nav className="flex items-center justify-between px-8 py-5 bg-primary text-white relative">
+                
+                {/* Logo Central  */}
+                <div className="absolute left-1/2 -translate-x-1/2">
+                    <Link href="/" className="font-cormorant text-3xl font-light tracking-[0.55em] select-none">
+                        GROOVY
+                    </Link>
+                </div>
 
-                {/* Botón Salir con Clerk */}
-                <SignOutButton redirectUrl="/">
-                    <button style={{ 
-                        background: 'none', border: 'none', cursor: 'pointer', 
-                        display: 'flex', alignItems: 'center', gap: 8, 
-                        color: 'var(--text-dark)', fontSize: 16, fontWeight: 500 
-                    }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                            <polyline points="16 17 21 12 16 7"></polyline>
-                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                        </svg>
-                        Salir
+                {/* Íconos Derechos */}
+                <div className="flex items-center gap-6 ml-auto">
+                    {/* Búsqueda */}
+                    <button className="hover:opacity-80 transition-opacity">
+                        <MagnifyingGlassIcon className="w-5 h-5" />
                     </button>
-                </SignOutButton>
+
+                    {/* Botón Salir con Clerk */}
+                    <SignOutButton redirectUrl="/">
+                        <button className="flex items-center gap-2 hover:opacity-80 transition-opacity text-sm font-medium tracking-wide cursor-pointer bg-transparent border-none text-white" title="Salir">
+                            <ArrowRightEndOnRectangleIcon className="w-5 h-5" />
+                        </button>
+                    </SignOutButton>
+
+                    {/* Componente del Carrito Original */}
+                    <CartServer />
+                </div>
             </nav>
-            {/* FIN DE LA BARRA DE NAVEGACIÓN */}
 
-            <header style={{ marginBottom: 40 }}>
-                <h1 style={{ margin: 0, fontSize: 36, fontWeight: 500, color: 'var(--text-dark)' }}>Catálogo</h1>
-                <p style={{ margin: '8px 0 0', color: 'var(--text-medium)', fontSize: 16 }}>Mira nuestros productos más populares</p>
-                <div style={{ width: 80, height: 3, background: 'var(--accent-terracotta)', marginTop: 16, borderRadius: 2 }}></div>
-            </header>
+            {/* BARRA DE NAVEGACIÓN SECUNDARIA  */}
+            <div className="flex items-center justify-between px-8 py-3 bg-foreground text-white/50 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
+                <div className="flex items-center gap-8">
+                    <button className="bg-primary text-white px-5 py-1.5 rounded-full">ALL</button>
+                    <button className="hover:text-white transition-colors">VINYL</button>
+                    <button className="hover:text-white transition-colors">CD</button>
+                    <button className="hover:text-white transition-colors">CASSETTE</button>
+                </div>
+            </div>
 
-            <section style={{ display: 'grid', gap: 24, gridTemplateColumns: 'repeat(auto-fill,minmax(240px,1fr))' }}>
-                {products.map((p) => (
-                    <article key={p.id} style={{ 
-                        background: 'var(--panel-bg)', 
-                        border: '1px solid var(--divider)', 
-                        borderRadius: 12, 
-                        padding: 16,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
-                        display: 'flex',
-                        flexDirection: 'column'
-                    }}>
-                        <Link href={`/catalogo/${p.id}`} style={{ textDecoration: 'none', color: 'inherit', flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                            <div style={{ width: '100%', height: 200, position: 'relative', marginBottom: 16, background: '#e9e9e9', borderRadius: 8, overflow: 'hidden' }}>
-                                <Image 
-                                    src={p.carpeta_imagenes || '/placeholder-record.png'} 
-                                    alt={p.titulo} 
-                                    fill 
-                                    style={{ objectFit: 'cover' }} 
-                                />
-                            </div>
-                            
-                            <h2 style={{ fontSize: 18, fontWeight: 600, margin: '0 0 8px', color: 'var(--text-dark)' }}>{p.titulo}</h2>
-                            {p.artista && <div style={{ color: 'var(--text-medium)', fontSize: 14, marginBottom: 16 }}>{p.artista}</div>}
-                            
-                            <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--divider)', paddingTop: 16 }}>
-                                <div style={{ fontWeight: 600, fontSize: 18, color: 'var(--text-dark)' }}>
-                                    ${p.precio.toFixed(2)}
+            {/* VISTA DE PRODUCTOS */}
+            <div className="max-w-7xl mx-auto px-8 mt-10">
+                <header className="mb-10">
+                    <h1 className="font-syne m-0 text-4xl font-semibold text-foreground">Catálogo</h1>
+                    <p className="font-dm mt-2 mb-0 text-foreground/70 text-base">Mira nuestros productos más populares</p>
+                    <div className="w-20 h-1 bg-primary mt-4 rounded-full"></div>
+                </header>
+
+                <section className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(240px,1fr))]">
+                    {products.map((p) => (
+                        <article key={p.id} className="bg-card border border-border rounded-xl p-4 shadow-sm flex flex-col hover:shadow-md transition-shadow">
+                            <Link href={`/catalogo/${p.id}`} className="no-underline text-inherit flex-grow flex flex-col">
+                                
+                                <div className="w-full h-48 relative mb-4 bg-[#e9e9e9] rounded-lg overflow-hidden">
+                                    <Image 
+                                        src={p.carpeta_imagenes || '/placeholder-record.png'} 
+                                        alt={p.titulo} 
+                                        fill 
+                                        className="object-cover"
+                                    />
                                 </div>
-                                <span style={{ background: 'var(--accent-terracotta)', color: 'white', padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 600 }}>
-                                    Ver detalles
-                                </span>
-                            </div>
-                        </Link>
-                    </article>
-                ))}
-            </section>
+                                
+                                <h2 className="font-syne text-lg font-semibold m-0 mb-2 text-foreground">{p.titulo}</h2>
+                                {p.artista && <div className="font-dm text-foreground/70 text-sm mb-4">{p.artista}</div>}
+                                
+                                <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
+                                    <div className="font-syne font-bold text-lg text-foreground">
+                                        ${p.precio.toFixed(2)}
+                                    </div>
+                                    <span className="font-dm bg-primary text-white px-3.5 py-1.5 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">
+                                        Ver detalles
+                                    </span>
+                                </div>
+                                
+                            </Link>
+                        </article>
+                    ))}
+                </section>
+            </div>
         </main>
     )
 }

@@ -1,6 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import SimpleNavBar from "./ui/SimpleNavBar";
 
 export default async function Home() {
   const { userId } = await auth(); 
@@ -15,11 +16,7 @@ export default async function Home() {
     <main className="min-h-screen bg-background font-dm flex flex-col">
       
       {/* BARRA DE NAVEGACIÓN SUPERIOR  */}
-      <nav className="flex items-center justify-center px-8 py-5 bg-primary text-white">
-        <div className="font-cormorant text-3xl font-light tracking-[0.55em] select-none">
-          GROOVY
-        </div>
-      </nav>
+     <SimpleNavBar />
 
       {/* CONTENIDO PRINCIPAL  */}
       <div className="flex flex-grow items-center justify-center p-6">

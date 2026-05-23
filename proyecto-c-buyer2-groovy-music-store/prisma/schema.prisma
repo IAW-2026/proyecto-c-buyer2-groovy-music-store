@@ -55,6 +55,7 @@ model ItemCarrito {
   producto_id Int
   cantidad    Int
   id_carrito  Int
+  id_seller   String
 
   // Relación con Carrito
   carrito     Carrito @relation(fields: [id_carrito], references: [id_carrito])

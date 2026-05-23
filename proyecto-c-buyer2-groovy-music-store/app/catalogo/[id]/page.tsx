@@ -18,7 +18,7 @@ type Product = {
     condicion: string; 
     genero: string; 
     imagenes: string[]; 
-    seller_id: { id: string }
+    seller_id: string;
 }
 
 // Productos de prueba
@@ -27,19 +27,19 @@ const sampleProducts: Product[] = [
         id: 1, titulo: 'Groovy Vinyl 1', artista: 'Artist A', precio: 19.99, stock: 5, 
         formato: 'Vinilo LP', condicion: 'Nuevo', genero: 'Rock', 
         imagenes: ['/placeholder-record.png', '/placeholder-record.png'], 
-        seller_id: { id: 'clerk_123' } 
+        seller_id: 'clerk_123'  
     },
     { 
         id: 2, titulo: 'Groovy Vinyl 2', artista: 'Artist B', precio: 24.50, stock: 2, 
         formato: 'Vinilo 7"', condicion: 'Usado', genero: 'Jazz', 
         imagenes: ['/placeholder-record.png'], 
-        seller_id: { id: 'clerk_123' } 
+        seller_id:  'clerk_123' 
     },
     { 
         id: 3, titulo: 'Groovy Vinyl 3', artista: 'Artist C', precio: 15.00, stock: 0, 
         formato: 'Cassette', condicion: 'Nuevo', genero: 'Pop', 
         imagenes: ['/placeholder-record.png'], 
-        seller_id: { id: 'clerk_456' } 
+        seller_id:  'clerk_456'  
     }
 ]
 
@@ -117,6 +117,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                             <BotonAgregarCarrito 
                                 productoId={product.id} 
                                 stock={product.stock} 
+                                sellerId={product.seller_id}
                             />
                         </div>
                     </div>

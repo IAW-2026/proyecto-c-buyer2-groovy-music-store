@@ -6,15 +6,16 @@ import { agregarAlCarrito } from '@/app/lib/actions/actions-cart';
 interface BotonProps {
     productoId: number;
     stock: number;
+    sellerId: string;
 }
 
-export default function BotonAgregarCarrito({ productoId, stock }: BotonProps) {
+export default function BotonAgregarCarrito({ productoId, stock, sellerId }: BotonProps) {
     const [isPending, startTransition] = useTransition();
     const [fueAgregado, setFueAgregado] = useState(false);
 
     const handleAgregar = () => {
         startTransition(async () => {
-            const resultado = await agregarAlCarrito(productoId);
+            const resultado = await agregarAlCarrito(productoId, sellerId);
             
             if (resultado?.success) {
                 setFueAgregado(true);

@@ -4,7 +4,8 @@ import prisma from '@/app/lib/prisma';
 import { auth, currentUser } from '@clerk/nextjs/server'; 
 import { revalidatePath } from 'next/cache';
 
-export async function agregarAlCarrito(producto_id: number) {
+// 1. Modificamos la firma para recibir también el id_seller
+export async function agregarAlCarrito(producto_id: number, id_seller: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Debes iniciar sesión para comprar");
 
@@ -16,28 +17,22 @@ export async function agregarAlCarrito(producto_id: number) {
 
         // Si no existe, le pedimos a Clerk sus datos completos antes de crearlo
         if (!usuarioExiste) {
-            // Traemos el perfil de Clerk (
             const datosClerk = await currentUser();
             
-            // Extraemos el email principal de la lista de correos que tiene el usuario
             const emailUsuario = datosClerk?.emailAddresses[0]?.emailAddress || "sin-email@groovy.com";
-            
-            // Extraemos el nombre 
             const nombreUsuario = datosClerk?.firstName 
                 ? `${datosClerk.firstName} ${datosClerk.lastName || ''}`.trim()
                 : "Usuario de Groovy"; 
 
-            // Insertamos el usuario con su información real
             await prisma.usuario.create({
                 data: { 
                     clerk_id: userId,
                     nombre: nombreUsuario,
-                    mail: emailUsuario, 
+                    mail: emailUsuario
                 }
             });
         }
 
-        // --- El resto de tu lógica del carrito queda exactamente igual ---
         let carrito = await prisma.carrito.findFirst({
             where: { clerk_id: userId }
         });
@@ -72,7 +67,8 @@ export async function agregarAlCarrito(producto_id: number) {
                 data: {
                     id_carrito: carrito.id_carrito,
                     producto_id: producto_id,
-                    cantidad: 1
+                    cantidad: 1,
+                    id_seller: id_seller 
                 }
             });
         }

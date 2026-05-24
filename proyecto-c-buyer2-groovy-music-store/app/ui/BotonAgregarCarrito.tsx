@@ -4,7 +4,7 @@ import { useTransition, useState } from 'react';
 import { agregarAlCarrito } from '@/app/lib/actions/actions-cart';
 
 interface BotonProps {
-    productoId: number;
+    productoId: string;
     stock: number;
     sellerId: string;
 }

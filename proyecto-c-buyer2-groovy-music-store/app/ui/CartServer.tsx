@@ -4,7 +4,7 @@ import CartDropdown from './CartDropdown';
 
 // Definicion de productos e items para procesamiento interno en CartServer
 export type SellerProduct = {
-    id: number;
+    id: string;
     titulo: string;
     artista: string;
     precio: number;
@@ -17,16 +17,16 @@ export type SellerProduct = {
 };
 
 export type HydratedCartItem = {
-    id_carrito: number;
-    producto_id: number;
+    id_carrito: string;
+    producto_id: string;
     cantidad: number;
     producto: SellerProduct;
 };
 
 const sampleProducts: SellerProduct[] = [
-    { id: 1, titulo: 'Groovy Vinyl 1', artista: 'Artist A', precio: 19.99, stock: 5, formato: 'Vinilo LP', condicion: 'Nuevo', genero: 'Rock', imagenes: ['/placeholder-record.png'], id_seller: 'clerk_123' },
-    { id: 2, titulo: 'Groovy Vinyl 2', artista: 'Artist B', precio: 24.50, stock: 2, formato: 'Vinilo 7"', condicion: 'Usado', genero: 'Jazz', imagenes: ['/placeholder-record.png'], id_seller: 'clerk_123' },
-    { id: 3, titulo: 'Groovy Vinyl 3', artista: 'Artist C', precio: 15.00, stock: 0, formato: 'Cassette', condicion: 'Nuevo', genero: 'Pop', imagenes: ['/placeholder-record.png'], id_seller: 'clerk_456' }
+    { id: '1', titulo: 'Groovy Vinyl 1', artista: 'Artist A', precio: 19.99, stock: 5, formato: 'Vinilo LP', condicion: 'Nuevo', genero: 'Rock', imagenes: ['/placeholder-record.png'], id_seller: 'clerk_123' },
+    { id: '2', titulo: 'Groovy Vinyl 2', artista: 'Artist B', precio: 24.50, stock: 2, formato: 'Vinilo 7"', condicion: 'Usado', genero: 'Jazz', imagenes: ['/placeholder-record.png'], id_seller: 'clerk_123' },
+    { id: '3', titulo: 'Groovy Vinyl 3', artista: 'Artist C', precio: 15.00, stock: 0, formato: 'Cassette', condicion: 'Nuevo', genero: 'Pop', imagenes: ['/placeholder-record.png'], id_seller: 'clerk_456' }
 ];
 
 export default async function CartServer() {

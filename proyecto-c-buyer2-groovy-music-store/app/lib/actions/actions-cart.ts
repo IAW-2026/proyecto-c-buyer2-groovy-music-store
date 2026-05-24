@@ -5,7 +5,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { revalidatePath } from 'next/cache';
 
 // 1. Modificamos la firma para recibir también el id_seller
-export async function agregarAlCarrito(producto_id: number, id_seller: string) {
+export async function agregarAlCarrito(producto_id: string, id_seller: string) {
     const { userId } = await auth();
     if (!userId) throw new Error("Debes iniciar sesión para comprar");
 
@@ -48,6 +48,7 @@ export async function agregarAlCarrito(producto_id: number, id_seller: string) {
                 id_carrito_producto_id: {
                     id_carrito: carrito.id_carrito,
                     producto_id: producto_id
+
                 }
             }
         });
@@ -83,7 +84,7 @@ export async function agregarAlCarrito(producto_id: number, id_seller: string) {
 }
 
 // 2. Función para actualizar la cantidad (+ / -) desde el dropdown
-export async function actualizarCantidadItemBD(id_carrito: number, producto_id: number, nuevaCantidad: number) {
+export async function actualizarCantidadItemBD(id_carrito: string, producto_id: string, nuevaCantidad: number) {
     try {
         await prisma.itemCarrito.update({
             where: {
@@ -106,7 +107,7 @@ export async function actualizarCantidadItemBD(id_carrito: number, producto_id: 
 }
 
 // 3. Función para eliminar el producto (Tacho de basura)
-export async function eliminarItemBD(id_carrito: number, producto_id: number) {
+export async function eliminarItemBD(id_carrito: string, producto_id: string) {
     try {
         await prisma.itemCarrito.delete({
             where: {

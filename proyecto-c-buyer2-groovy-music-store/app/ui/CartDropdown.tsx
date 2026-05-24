@@ -22,7 +22,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
         setCartItems(items);
     }, [items]);
 
-    const handleUpdateQuantity = async (id_carrito: number, producto_id: number, delta: number) => {
+    const handleUpdateQuantity = async (id_carrito: string, producto_id: string, delta: number) => {
         const item = cartItems.find(i => i.producto_id === producto_id);
         if (!item) return;
 
@@ -51,7 +51,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
         }
     };
 
-    const handleRemoveItem = async (id_carrito: number, producto_id: number) => {
+    const handleRemoveItem = async (id_carrito: string, producto_id: string) => {
         const itemAEliminar = cartItems.find(i => i.producto_id === producto_id);
         
         // 1. Borrado visual instantáneo

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:reset": "dotenv -e .env.local -- prisma db push --force-reset",
+    "db:migrate": "dotenv -e .env.local -- prisma migrate dev"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.3.7",
@@ -22,6 +24,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "prisma": "^6.19.3",

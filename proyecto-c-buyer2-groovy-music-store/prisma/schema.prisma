@@ -1,5 +1,3 @@
-
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -10,82 +8,68 @@ generator client {
 }
 
 model Usuario {
-  clerk_id    String      @id
-  nombre      String
-  mail        String
+  clerk_id             String    @id
+  nombre               String
+  mail                 String
   
-  // Relaciones inversas que Prisma necesita para entender el modelo
-  direcciones Direccion[]
-  carritos    Carrito[]
+  direcciones          Direccion[]
+  carritos             Carrito[]
   
-  // Como un usuario puede ser comprador o vendedor en las órdenes:
-  ordenesComoComprador Orden[] @relation("BuyerOrders")
-  ordenesComoVendedor  Orden[] @relation("SellerOrders")
+  ordenesComoComprador Orden[]   @relation("BuyerOrders")
+  ordenesComoVendedor  Orden[]   @relation("SellerOrders")
 }
 
 model Direccion {
-  id         Int     @id @default(autoincrement())
+  id         String   @id @default(uuid()) @db.Uuid
   calle      String
   ciudad     String
   provincia  String
   cod_postal String
   pais       String
   
-  // Relación con Usuario ("tiene")
   clerk_id   String
-  usuario    Usuario @relation(fields: [clerk_id], references: [clerk_id])
+  usuario    Usuario  @relation(fields: [clerk_id], references: [clerk_id])
 
-  // Relación con Orden ("se envía a")
   ordenes    Orden[]
 }
 
 model Carrito {
-  id_carrito  Int           @id @default(autoincrement())
+  id_carrito  String        @id @default(uuid()) @db.Uuid
   clerk_id    String
-  producto_id Int?          // Se deja opcional por si el carrito inicia vacío
+  producto_id String?       @db.Uuid 
   
-  // Relación con Usuario ("posee")
   usuario     Usuario       @relation(fields: [clerk_id], references: [clerk_id])
-  
-  // Relación con ItemCarrito ("contiene")
   items       ItemCarrito[]
 }
 
 model ItemCarrito {
-  producto_id Int
+  producto_id String   @db.Uuid 
   cantidad    Int
-  id_carrito  Int
+  id_carrito  String   @db.Uuid 
   id_seller   String
 
-  // Relación con Carrito
-  carrito     Carrito @relation(fields: [id_carrito], references: [id_carrito])
-
-  // Relación con Orden ("proviene de")
+  carrito     Carrito  @relation(fields: [id_carrito], references: [id_carrito])
   ordenes     Orden[]
 
-  // Clave primaria compuesta (evita que se duplique el mismo producto en el mismo carrito)
   @@id([id_carrito, producto_id])
 }
 
 model Orden {
-  nro_orden     Int      @id @default(autoincrement())
+  nro_orden     String   @id @default(uuid()) @db.Uuid
   monto         Float
   estado        String
   fecha         DateTime @default(now())
   empresa_envio String
 
-  // Relaciones con Usuario (Cambiados a String para conectar con clerk_id)
   id_buyer      String
   id_seller     String
   buyer         Usuario  @relation("BuyerOrders", fields: [id_buyer], references: [clerk_id])
   seller        Usuario  @relation("SellerOrders", fields: [id_seller], references: [clerk_id])
 
-  // Relación con Direccion ("se envía a")
-  id_direccion  Int
+  id_direccion  String   @db.Uuid 
   direccion     Direccion @relation(fields: [id_direccion], references: [id])
 
-  // Relación con ItemCarrito ("proviene de")
-  id_carrito    Int
-  producto_id   Int
+  id_carrito    String   @db.Uuid 
+  producto_id   String   @db.Uuid 
   itemCarrito   ItemCarrito @relation(fields: [id_carrito, producto_id], references: [id_carrito, producto_id])
 }

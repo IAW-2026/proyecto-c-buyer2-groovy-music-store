@@ -81,3 +81,46 @@ export async function agregarAlCarrito(producto_id: number, id_seller: string) {
         return { success: false, error: "Error de base de datos" };
     }
 }
+
+// 2. Función para actualizar la cantidad (+ / -) desde el dropdown
+export async function actualizarCantidadItemBD(id_carrito: number, producto_id: number, nuevaCantidad: number) {
+    try {
+        await prisma.itemCarrito.update({
+            where: {
+                id_carrito_producto_id: {
+                    id_carrito: id_carrito,
+                    producto_id: producto_id
+                }
+            },
+            data: {
+                cantidad: nuevaCantidad,
+            },
+        });
+        
+        revalidatePath('/', 'layout');
+        return { success: true };
+    } catch (error) {
+        console.error("Error al actualizar la cantidad:", error);
+        return { success: false, error: "No se pudo actualizar el registro local." };
+    }
+}
+
+// 3. Función para eliminar el producto (Tacho de basura)
+export async function eliminarItemBD(id_carrito: number, producto_id: number) {
+    try {
+        await prisma.itemCarrito.delete({
+            where: {
+                id_carrito_producto_id: {
+                    id_carrito: id_carrito,
+                    producto_id: producto_id
+                }
+            },
+        });
+
+        revalidatePath('/', 'layout');
+        return { success: true };
+    } catch (error) {
+        console.error("Error al eliminar el item:", error);
+        return { success: false, error: "No se pudo eliminar el registro local." };
+    }
+}

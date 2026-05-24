@@ -1,7 +1,10 @@
 import { redirect } from 'next/navigation';
 import Image from 'next/image';
 import { auth } from '@clerk/nextjs/server';
-import  prisma  from '@/app/lib/prisma'; // Tu instancia singleton real
+import  prisma  from '@/app/lib/prisma'; 
+import SimpleNavBar from '../ui/SimpleNavBar';
+import Link from 'next/link'
+import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 // Un mock ultra reducido: solo la información visual indexada por ID de producto
 const detallesProductosMock: Record<number, { titulo: string; artista: string; precio: number; imagen: string }> = {
@@ -28,7 +31,6 @@ export default async function CheckoutPage({ searchParams}: {searchParams: Promi
         }
     }
 });
-console.log("DEBUG CHECKOUT - Items encontrados en DB:", itemsDb);
 
     if (itemsDb.length === 0) {
         redirect('/');
@@ -49,9 +51,24 @@ console.log("DEBUG CHECKOUT - Items encontrados en DB:", itemsDb);
     const subtotal = itemsParaCheckout.reduce((acc, item) => acc + (item!.precio * item!.cantidad), 0);
 
     return (
-        <div className="max-w-5xl mx-auto p-6 md:p-12 font-dm text-foreground min-h-screen">
+          <main className="min-h-screen bg-background font-dm pb-20">
             
-            <header className="mb-10 border-b border-border pb-6">
+            <SimpleNavBar/>
+            
+            {/* BARRA DE NAVEGACIÓN SECUNDARIA  */}
+            <div className="flex items-center justify-between px-8 py-3 bg-foreground text-white/50 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
+                <div className="flex items-center gap-8">
+                    <Link href="/catalogo" className="flex items-center gap-2 hover:text-white transition-colors">
+                    <ArrowLeftIcon className="w-4 h-4" />
+                    <span>Volver al catálogo</span>
+                </Link>
+                </div>
+            </div>
+
+
+
+            <div className="max-w-7xl mx-auto px-8 mt-10">
+            <header className="mb-10">
                 <h1 className="text-3xl md:text-4xl font-bold font-syne mb-2">
                     Resumen de tu Orden
                 </h1>
@@ -59,6 +76,7 @@ console.log("DEBUG CHECKOUT - Items encontrados en DB:", itemsDb);
                     Comprando los productos del vendedor: <span className="font-semibold text-primary">{sellerId}</span>
                 </p>
             </header>
+            
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
@@ -115,9 +133,10 @@ console.log("DEBUG CHECKOUT - Items encontrados en DB:", itemsDb);
                         </button>
                     </div>
                 </div>
+                </div>
 
             </div>
-        </div>
+        </main>
     );
 }
 

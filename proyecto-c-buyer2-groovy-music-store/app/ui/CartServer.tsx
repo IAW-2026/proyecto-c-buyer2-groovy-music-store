@@ -2,8 +2,8 @@ import { auth } from '@clerk/nextjs/server';
 import prisma from '@/app/lib/prisma';
 import CartDropdown from './CartDropdown';
 
-// 1. Definimos la interfaz completa basada en tus datos reales
-type SellerProduct = {
+// Definicion de productos e items para procesamiento interno en CartServer
+export type SellerProduct = {
     id: number;
     titulo: string;
     artista: string;
@@ -16,7 +16,7 @@ type SellerProduct = {
     id_seller: string;
 };
 
-type HydratedCartItem = {
+export type HydratedCartItem = {
     id_carrito: number;
     producto_id: number;
     cantidad: number;
@@ -50,7 +50,6 @@ export default async function CartServer() {
                 id_carrito: itemLocal.id_carrito,
                 producto_id: itemLocal.producto_id,
                 cantidad: itemLocal.cantidad,
-                // Si no existe, creamos un objeto base que cumple con el tipo SellerProduct
                 producto: detalleProducto || {
                     id: itemLocal.producto_id,
                     titulo: 'Producto no disponible',

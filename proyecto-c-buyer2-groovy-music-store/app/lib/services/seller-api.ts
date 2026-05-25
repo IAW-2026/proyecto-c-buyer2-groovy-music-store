@@ -10,19 +10,24 @@ import {
 cambiar cuando conecte la api de la seller app */
 
 
-// 1. Obtener catálogo completo (Para tu grilla principal)
+
+// 1. Obtener catálogo de productos
 export async function getCatalog(): Promise<ProductSummary[]> {
     return mockProductSummaries;
 }
 
-// 2. Obtener un detalle rápido por ID (Para el carrito / checkout)
+//2. Obtener detalle de producto
+//GET /api/products/:id
+//para la vista de carrito y la pagina de checkout
 export async function getProductQuickDetail(id: string) {
     const detalle = detallesProductosMock[id];
     if (!detalle) return null;
     return detalle;
 }
 
-// 3. Obtener el producto completo (Para la página de detalle del disco)
+//2. Obtener detalle de producto
+// GET /api/products/:id
+//para  la pagina de detalle del producto
 export async function getFullProduct(id: string): Promise<Product | null> {
     const product = mockProducts.find(p => p.id === id);
     return product || null;

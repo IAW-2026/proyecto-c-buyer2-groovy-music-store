@@ -4,7 +4,8 @@ import NavBar from '@/app/ui/NavBar'
 import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import prisma from "@/app/lib/prisma"
-import { mockProductSummaries } from '@/app/lib/placeholder-data'
+
+import {getCatalog} from '@/app/lib/services/seller-api'
 
 
 
@@ -15,7 +16,7 @@ export const metadata = {
 
 // Transformamos el componente en async para poder usar await
 export default async function CatalogPage() {
-    const products = mockProductSummaries
+    const products = await getCatalog();
 
     // 1. Obtenemos la info del usuario desde Clerk
     const user = await currentUser();

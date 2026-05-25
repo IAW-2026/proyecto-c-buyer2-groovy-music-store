@@ -7,16 +7,15 @@ import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
 import BotonAgregarCarrito from '@/app/ui/BotonAgregarCarrito'
 import NavBar from '@/app/ui/NavBar'
 
-//  datos de prueba
-import {mockProducts} from '@/app/lib/placeholder-data'
+import { getFullProduct } from '@/app/lib/services/seller-api'
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
     
     // Resolvemos la URL
     const resolvedParams = await params;
     
-    // Buscamos en nuestra lista de los productos
-    const product = mockProducts.find((p) => p.id === resolvedParams.id)
+    // Buscamos el producto especifico en la lista de productos 
+    const product = await getFullProduct(resolvedParams.id);
 
     if (!product) notFound()
 
@@ -26,8 +25,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             {/* BARRA DE NAVEGACIÓN SUPERIOR  */}
             <NavBar />
 
+            
             {/* BARRA DE NAVEGACIÓN SECUNDARIA  */}
-            <div className="flex items-center px-8 py-3 bg-foreground text-white/50 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
+            <div className="flex items-center justify-between px-8 py-3 bg-foreground text-white/50 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
                 <Link href="/catalogo" className="flex items-center gap-2 hover:text-white transition-colors">
                     <ArrowLeftIcon className="w-4 h-4" />
                     <span>Volver al catálogo</span>
@@ -84,7 +84,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                             <BotonAgregarCarrito 
                                 productoId={product.id} 
                                 stock={product.stock} 
-                                sellerId={product.seller_id}
+                                sellerId={product.seller_id.id}
                             />
                         </div>
                     </div>

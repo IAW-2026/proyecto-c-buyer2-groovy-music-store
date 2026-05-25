@@ -70,7 +70,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
 
     // Agrupación por Vendedor
     const groupedCart = cartItems.reduce((acc, item) => {
-        const sellerId = item.producto.seller_id || 'Vendedor Desconocido';
+        const sellerId = item.producto.seller_id?.id || 'Vendedor Desconocido';
         if (!acc[sellerId]) acc[sellerId] = [];
         acc[sellerId].push(item);
         return acc;
@@ -106,7 +106,8 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                             <p className="text-center text-foreground/60 my-4 text-sm">Tu carrito está vacío</p>
                         ) : (
                             Object.entries(groupedCart).map(([vendedorId, itemsDelVendedor]) => {
-                                const idSellerReal = itemsDelVendedor[0].producto.seller_id;
+                                // CORREGIDO: Extraemos el string del objeto para mandarlo a la URL
+                                const idSellerReal = itemsDelVendedor[0].producto.seller_id.id;
                                 const subtotal = itemsDelVendedor.reduce((acc, item) => acc + (item.producto.precio * item.cantidad), 0);
 
                                 return (
@@ -186,8 +187,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                                                 </span>
                                                             )}
                                                         </div>
-
-                                                        </li>
+                                                    </li>
                                                 );
                                             })}
                                         </ul>

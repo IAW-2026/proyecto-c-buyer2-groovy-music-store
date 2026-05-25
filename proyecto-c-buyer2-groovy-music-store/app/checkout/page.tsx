@@ -7,12 +7,12 @@ import Link from 'next/link'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 
-// Un mock ultra reducido: solo la información visual indexada por ID de producto
-const detallesProductosMock: Record<string, { titulo: string; artista: string; precio: number; imagen: string }> = {
-  '123e4567-e89b-12d3-a456-426614174001': { titulo: 'Groovy Vinyl 1', artista: 'Artist A', precio: 19.99, imagen: '/placeholder-record.png' },
-  '123e4567-e89b-12d3-a456-426614174002': { titulo: 'Groovy Vinyl 2', artista: 'Artist B', precio: 24.50, imagen: '/placeholder-record.png' },
-  '123e4567-e89b-12d3-a456-426614174003': { titulo: 'Groovy Vinyl 3', artista: 'Artist C', precio: 15.00, imagen: '/placeholder-record.png' },
-};
+import { detallesProductosMock } from '../lib/placeholder-data';
+
+export const metadata = {
+    title: 'Checkout - Groovy Music Store',
+    description: 'Página de checkout para revisar tu orden antes de confirmar la compra',
+}
 
 export default async function CheckoutPage({ searchParams}: {searchParams: Promise<{ seller?: string }>; }) {
     const params = await searchParams;          

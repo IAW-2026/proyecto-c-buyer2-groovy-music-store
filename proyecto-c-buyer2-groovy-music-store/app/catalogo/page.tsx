@@ -4,41 +4,9 @@ import NavBar from '@/app/ui/NavBar'
 import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import prisma from "@/app/lib/prisma"
+import { mockProductSummaries } from '@/app/lib/placeholder-data'
 
 
-// Tipo de datos liviano para no traer info de la BD de mas
-type ProductSummary = {
-    id: number
-    titulo: string
-    artista: string
-    precio: number
-    carpeta_imagenes: string
-}
-
-// Arreglo simulado (Coincide con los IDs de nuestro fakeApiProducts en CartServer)
-const sampleProducts: ProductSummary[] = [
-    { 
-        id: 1, 
-        titulo: 'Groovy Vinyl 1', 
-        artista: 'Artist A', 
-        precio: 19.99, 
-        carpeta_imagenes: '/placeholder-record.png' 
-    },
-    { 
-        id: 2, 
-        titulo: 'Groovy Vinyl 2', 
-        artista: 'Artist B', 
-        precio: 24.50, 
-        carpeta_imagenes: '/placeholder-record.png' 
-    },
-    { 
-        id: 3, 
-        titulo: 'Groovy Vinyl 3', 
-        artista: 'Artist C', 
-        precio: 15.00, 
-        carpeta_imagenes: '/placeholder-record.png' 
-    },
-]
 
 export const metadata = {
     title: 'Catálogo - Groovy Music Store',
@@ -47,7 +15,7 @@ export const metadata = {
 
 // Transformamos el componente en async para poder usar await
 export default async function CatalogPage() {
-    const products = sampleProducts
+    const products = mockProductSummaries
 
     // 1. Obtenemos la info del usuario desde Clerk
     const user = await currentUser();
@@ -81,10 +49,10 @@ export default async function CatalogPage() {
             {/* BARRA DE NAVEGACIÓN SECUNDARIA  */}
             <div className="flex items-center justify-between px-8 py-3 bg-foreground text-white/50 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
                 <div className="flex items-center gap-8">
-                    <button className="bg-primary text-white px-5 py-1.5 rounded-full">ALL</button>
-                    <button className="hover:text-white transition-colors">VINYL</button>
-                    <button className="hover:text-white transition-colors">CD</button>
-                    <button className="hover:text-white transition-colors">CASSETTE</button>
+                    <button className="bg-primary text-white px-5 py-1.5 rounded-full">TODO</button>
+                    <button className="hover:text-white transition-colors">VINILOS</button>
+                    <button className="hover:text-white transition-colors">CDS</button>
+                    <button className="hover:text-white transition-colors">CASSETTES</button>
                 </div>
             </div>
 
@@ -106,7 +74,7 @@ export default async function CatalogPage() {
                                 
                                 <div className="w-full h-48 relative mb-4 bg-[#e9e9e9] rounded-lg overflow-hidden">
                                     <Image 
-                                        src={p.carpeta_imagenes || '/placeholder-record.png'} 
+                                        src={p.imagen_principal || '/placeholder-record.png'} 
                                         alt={p.titulo} 
                                         fill 
                                         className="object-cover"

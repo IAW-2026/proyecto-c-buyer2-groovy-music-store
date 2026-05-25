@@ -5,9 +5,10 @@ import Image from 'next/image';
 import { ShoppingCartIcon, TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
-// Importamos tus Server Actions reales
+// Importamos Server Actions reales
 import { actualizarCantidadItemBD, eliminarItemBD } from '@/app/lib/actions/actions-cart';
-import type { HydratedCartItem } from './CartServer'; // Importamos el tipo del padre
+//Tipos
+import type { HydratedCartItem } from '@/app/lib/definitions';
 
 interface CartDropdownProps {
     items: HydratedCartItem[];
@@ -69,7 +70,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
 
     // Agrupación por Vendedor
     const groupedCart = cartItems.reduce((acc, item) => {
-        const sellerId = item.producto.id_seller || 'Vendedor Desconocido';
+        const sellerId = item.producto.seller_id || 'Vendedor Desconocido';
         if (!acc[sellerId]) acc[sellerId] = [];
         acc[sellerId].push(item);
         return acc;
@@ -105,7 +106,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                             <p className="text-center text-foreground/60 my-4 text-sm">Tu carrito está vacío</p>
                         ) : (
                             Object.entries(groupedCart).map(([vendedorId, itemsDelVendedor]) => {
-                                const idSellerReal = itemsDelVendedor[0].producto.id_seller;
+                                const idSellerReal = itemsDelVendedor[0].producto.seller_id;
                                 const subtotal = itemsDelVendedor.reduce((acc, item) => acc + (item.producto.precio * item.cantidad), 0);
 
                                 return (

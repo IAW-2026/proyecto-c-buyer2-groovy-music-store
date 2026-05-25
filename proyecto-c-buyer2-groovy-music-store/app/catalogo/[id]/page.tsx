@@ -2,54 +2,21 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
-// Tus componentes
+// componentes
 import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
 import BotonAgregarCarrito from '@/app/ui/BotonAgregarCarrito'
-import CartServer from '@/app/ui/CartServer'
 import NavBar from '@/app/ui/NavBar'
 
-type Product = {
-    id: string;
-    titulo: string;
-    artista: string;
-    precio: number;
-    stock: number; 
-    formato: string; 
-    condicion: string; 
-    genero: string; 
-    imagenes: string[]; 
-    seller_id: string;
-}
-
-// Productos de prueba
-const sampleProducts: Product[] = [
-    { 
-        id: '1', titulo: 'Groovy Vinyl 1', artista: 'Artist A', precio: 19.99, stock: 5, 
-        formato: 'Vinilo LP', condicion: 'Nuevo', genero: 'Rock', 
-        imagenes: ['/placeholder-record.png', '/placeholder-record.png'], 
-        seller_id: 'clerk_123'  
-    },
-    { 
-        id: '2', titulo: 'Groovy Vinyl 2', artista: 'Artist B', precio: 24.50, stock: 2, 
-        formato: 'Vinilo 7"', condicion: 'Usado', genero: 'Jazz', 
-        imagenes: ['/placeholder-record.png'], 
-        seller_id:  'clerk_123' 
-    },
-    { 
-        id: '3', titulo: 'Groovy Vinyl 3', artista: 'Artist C', precio: 15.00, stock: 0, 
-        formato: 'Cassette', condicion: 'Nuevo', genero: 'Pop', 
-        imagenes: ['/placeholder-record.png'], 
-        seller_id:  'clerk_456'  
-    }
-]
+//  datos de prueba
+import {mockProducts} from '@/app/lib/placeholder-data'
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
     
     // Resolvemos la URL
     const resolvedParams = await params;
     
-    // Buscamos en nuestra lista de los 3 productos
-    const product = sampleProducts.find((p) => p.id === resolvedParams.id)
+    // Buscamos en nuestra lista de los productos
+    const product = mockProducts.find((p) => p.id === resolvedParams.id)
 
     if (!product) notFound()
 

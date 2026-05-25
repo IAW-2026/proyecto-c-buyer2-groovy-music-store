@@ -8,7 +8,7 @@ generator client {
 }
 
 model Usuario {
-  clerk_id             String    @id
+  clerk_id             String      @id
   nombre               String
   mail                 String
   
@@ -16,7 +16,6 @@ model Usuario {
   carritos             Carrito[]
   
   ordenesComoComprador Orden[]   @relation("BuyerOrders")
-  ordenesComoVendedor  Orden[]   @relation("SellerOrders")
 }
 
 model Direccion {
@@ -36,7 +35,6 @@ model Direccion {
 model Carrito {
   id_carrito  String        @id @default(uuid()) @db.Uuid
   clerk_id    String
-  producto_id String?       @db.Uuid 
   
   usuario     Usuario       @relation(fields: [clerk_id], references: [clerk_id])
   items       ItemCarrito[]
@@ -49,7 +47,7 @@ model ItemCarrito {
   id_seller   String
 
   carrito     Carrito  @relation(fields: [id_carrito], references: [id_carrito])
-  ordenes     Orden[]
+  
 
   @@id([id_carrito, producto_id])
 }
@@ -63,13 +61,21 @@ model Orden {
 
   id_buyer      String
   id_seller     String
-  buyer         Usuario  @relation("BuyerOrders", fields: [id_buyer], references: [clerk_id])
-  seller        Usuario  @relation("SellerOrders", fields: [id_seller], references: [clerk_id])
+  buyer         Usuario  @relation("BuyerOrders", fields: [id_buyer], references: [clerk_id])      
 
-  id_direccion  String   @db.Uuid 
-  direccion     Direccion @relation(fields: [id_direccion], references: [id])
+  id_direccion  String      @db.Uuid 
+  direccion     Direccion   @relation(fields: [id_direccion], references: [id])
 
-  id_carrito    String   @db.Uuid 
-  producto_id   String   @db.Uuid 
-  itemCarrito   ItemCarrito @relation(fields: [id_carrito, producto_id], references: [id_carrito, producto_id])
+
+  items         ItemOrden[]
+}
+
+model ItemOrden {
+  id_item_orden String    @id @default(uuid()) @db.Uuid
+  nro_orden     String    @db.Uuid
+  producto_id   String    @db.Uuid // Dato externo a la Seller App
+  cantidad      Int
+  precio_unit   Float
+
+  orden         Orden     @relation(fields: [nro_orden], references: [nro_orden])
 }

@@ -136,13 +136,16 @@ export const mockProducts: Product[] = [
 // Para el carrito y el checkout
 export const detallesProductosMock = mockProducts.reduce((acc, product) => {
   acc[product.id] = {
+    id: product.id,
     titulo: product.titulo,
     artista: product.artista,
     precio: product.precio,
-    imagen: product.imagenes[0], 
+    stock: product.stock,                  
+    seller_id: product.seller_id,          
+    imagen_principal: product.imagenes[0], 
   };
   return acc;
-}, {} as Record<string, { titulo: string; artista: string; precio: number; imagen: string }>);
+}, {} as Record<string, ProductSummary>);
 
 // Para el catálogo
 export const mockProductSummaries: ProductSummary[] = mockProducts.map((product) => ({
@@ -150,6 +153,8 @@ export const mockProductSummaries: ProductSummary[] = mockProducts.map((product)
   titulo: product.titulo,
   artista: product.artista,
   precio: product.precio,
+  stock: product.stock,                 
+  seller_id: product.seller_id,
   imagen_principal: product.imagenes[0],
 }));
 

@@ -19,10 +19,12 @@ export async function getCatalog(): Promise<ProductSummary[]> {
 //2. Obtener detalle de producto
 //GET /api/products/:id
 //para la vista de carrito y la pagina de checkout
-export async function getProductQuickDetail(id: string) {
-    const detalle = detallesProductosMock[id];
-    if (!detalle) return null;
-    return detalle;
+export async function getProductQuickDetail(id: string): Promise<ProductSummary | null> {
+    const producto = detallesProductosMock[id];
+    if (!producto) {
+        return null;
+    }
+    return producto;
 }
 
 //2. Obtener detalle de producto

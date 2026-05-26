@@ -1,3 +1,19 @@
+//buyer app
+
+export type Direccion = {
+    id: string;
+    calle: string;
+    ciudad: string;
+    provincia: string;
+    cod_postal: string;
+    pais: string;
+};
+
+export type ItemCheckout = ProductSummary & {
+  cantidad: number;
+};
+
+
 //seller app
 
 export type Product = {
@@ -16,7 +32,7 @@ export type Product = {
   }; 
 };
 
-export type ProductSummary = Pick<Product, 'id' | 'titulo' | 'artista' | 'precio'> & {
+export type ProductSummary = Pick<Product, 'id' | 'titulo' | 'artista' | 'precio' | 'stock' | 'seller_id'> & {
   imagen_principal: string; 
 };
 
@@ -24,7 +40,7 @@ export type HydratedCartItem = {
   id_carrito: string;
   producto_id: string;
   cantidad: number;
-  producto: Product; 
+  producto: ProductSummary; 
 };
 
 

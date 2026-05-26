@@ -5,9 +5,9 @@ import Image from 'next/image';
 import { ShoppingCartIcon, TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
-// Importamos Server Actions reales
+
 import { actualizarCantidadItemBD, eliminarItemBD } from '@/app/lib/actions/actions-cart';
-//Tipos
+// Tipos
 import type { HydratedCartItem } from '@/app/lib/definitions';
 
 interface CartDropdownProps {
@@ -106,9 +106,10 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                             <p className="text-center text-foreground/60 my-4 text-sm">Tu carrito está vacío</p>
                         ) : (
                             Object.entries(groupedCart).map(([vendedorId, itemsDelVendedor]) => {
-                                // CORREGIDO: Extraemos el string del objeto para mandarlo a la URL
                                 const idSellerReal = itemsDelVendedor[0].producto.seller_id.id;
                                 const subtotal = itemsDelVendedor.reduce((acc, item) => acc + (item.producto.precio * item.cantidad), 0);
+                                
+                                // ... sigue igual
 
                                 return (
                                     <div key={vendedorId} className="border border-border rounded-lg p-3 bg-white shadow-sm">
@@ -125,7 +126,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                                         {/* 1. Imagen */}
                                                         <div className="w-12 h-12 relative bg-gray-200 rounded shrink-0 overflow-hidden">
                                                             <Image 
-                                                                src={item.producto.imagenes[0] || '/placeholder-record.png'} 
+                                                                src={item.producto.imagen_principal || '/placeholder-record.png'} 
                                                                 alt={item.producto.titulo} 
                                                                 fill 
                                                                 className="object-cover"

@@ -3,7 +3,7 @@ import prisma from '@/app/lib/prisma';
 import CartDropdown from './CartDropdown';
 
 import { HydratedCartItem } from '@/app/lib/definitions'
-import { getFullProduct } from '@/app/lib/services/seller-api' 
+import { getFullProduct, getProductQuickDetail } from '@/app/lib/services/seller-api' 
 
 export default async function CartServer() {
     const { userId } = await auth();
@@ -22,23 +22,20 @@ export default async function CartServer() {
         const itemsHidratados: HydratedCartItem[] = await Promise.all(
             itemsLocales.map(async (itemLocal) => {
                 
-                const detalleProducto = await getFullProduct(itemLocal.producto_id);
+                const resumenProducto = await getProductQuickDetail(itemLocal.producto_id);
                 
                 return {
                     id_carrito: itemLocal.id_carrito,
                     producto_id: itemLocal.producto_id,
                     cantidad: itemLocal.cantidad,
-                    producto: detalleProducto || {
+                    producto: resumenProducto || {
                         id: itemLocal.producto_id,
                         titulo: 'Producto no disponible',
                         artista: 'Desconocido',
                         precio: 0,
                         stock: 0,
-                        formato: '-',
-                        condicion: '-',
-                        genero: '-',
-                        imagenes: ['/placeholder-record.png'],
-                        seller_id: { id: 'desconocido' } 
+                        seller_id: { id: 'desconocido' } ,
+                        imagen_principal: '/placeholder-record.png',
                     }
                 };
             })

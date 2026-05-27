@@ -17,7 +17,7 @@ export async function procesarCheckout(formData: FormData) {
             data: {
                 //datos mockeados, acomodarlos
                 monto: total,
-                estado: 'Pendiente',
+                estado: 'Pendiente de envio',
                 empresa_envio: 'Logística Standard',
                 
                 id_seller: sellerId, 

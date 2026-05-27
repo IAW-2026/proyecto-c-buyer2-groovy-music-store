@@ -1,9 +1,9 @@
 import { SignOutButton } from "@clerk/nextjs"
-import { MagnifyingGlassIcon, ArrowRightEndOnRectangleIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, ArrowRightEndOnRectangleIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import CartServer from '@/app/ui/CartServer'
 import Link from 'next/link'
 
- export default function NavBar () {
+export default function NavBar () {
     return (
         <>
             {/* BARRA DE NAVEGACIÓN SUPERIOR */}
@@ -22,6 +22,11 @@ import Link from 'next/link'
                     <button className="hover:opacity-80 transition-opacity">
                         <MagnifyingGlassIcon className="w-5 h-5 md:w-5 md:h-5" />
                     </button>
+
+                    {/* Ícono de Perfil / Cuenta */}
+                    <Link href="/account/profile" className="hover:opacity-80 transition-opacity" title="Mi Cuenta">
+                        <UserCircleIcon className="w-5 h-5 md:w-5 md:h-5" />
+                    </Link>
 
                     {/* Botón Salir con Clerk */}
                     <SignOutButton redirectUrl="/">

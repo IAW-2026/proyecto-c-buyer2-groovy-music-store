@@ -2,7 +2,7 @@
 "use server"; 
 
 
-// import prisma from '@/lib/prisma'; 
+import prisma from '@/app/lib/prisma'; 
 
 export async function checkOrderStatus(ordenId: string) {
     try {
@@ -19,5 +19,22 @@ export async function checkOrderStatus(ordenId: string) {
     } catch (error) {
         console.error("Error consultando Prisma:", error);
         return null;
+    }
+}
+
+export async function getUserOrders(clerkId: string) {
+    try {
+        const orders = await prisma.orden.findMany({
+            where: {
+                id_buyer: clerkId
+            },
+            orderBy: {
+                fecha: 'desc'
+            }
+        });
+        return orders;
+    } catch (error) {
+        console.error("Error al buscar las ordenes:", error);
+        return [];
     }
 }

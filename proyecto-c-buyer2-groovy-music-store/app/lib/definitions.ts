@@ -61,3 +61,12 @@ export type ShippingEstimate = {
   fechaEntregaEstimada: number;
 };
 
+export type EstadoEnvio = 'pendiente' | 'en_transito' | 'entregado' | 'cancelado';
+
+export interface ShipmentResponse {
+    id: string;
+    codigoSeguimiento: string;
+    estado: EstadoEnvio;
+    fechaEntregaEstimada: string;
+}
+

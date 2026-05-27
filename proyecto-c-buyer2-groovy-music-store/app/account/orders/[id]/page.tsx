@@ -76,7 +76,7 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
             </header>
             
             {/* GRILLA DE INFORMACIÓN (Resumen y Envío) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-6 mb-6">
                 <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
                     <h3 className="font-syne text-xl font-semibold text-foreground mb-4 border-b border-border pb-2">
                         Resumen de la compra
@@ -104,30 +104,6 @@ export default async function OrderDetailsPage({ params }: { params: Promise<{ i
                         <span className="font-bold text-primary">
                             ${(order.monto || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                         </span>
-                    </div>
-                </div>
-
-                <div className="bg-card border border-border rounded-xl p-8 shadow-sm">
-                    <h3 className="font-syne text-xl font-semibold text-foreground mb-4 border-b border-border pb-2">
-                        Información de Envío
-                    </h3>
-                    <div className="flex flex-col gap-4 font-dm text-foreground/80">
-                        {order.direccion ? (
-                            <div>
-                                <p className="text-xs uppercase tracking-wider text-foreground/50 mb-2">Dirección de entrega</p>
-                                <p className="font-medium text-foreground text-lg mb-1">
-                                    {order.direccion.calle}
-                                </p>
-                                <p className="text-sm">
-                                    {order.direccion.ciudad}, {order.direccion.provincia}
-                                </p>
-                                <p className="text-sm">
-                                    CP: {order.direccion.cod_postal} - {order.direccion.pais}
-                                </p>
-                            </div>
-                        ) : (
-                            <p className="text-sm italic text-foreground/50">Dirección no disponible</p>
-                        )}
                     </div>
                 </div>
             </div>

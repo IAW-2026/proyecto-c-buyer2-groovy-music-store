@@ -28,6 +28,9 @@ export async function getUserOrders(clerkId: string) {
             where: {
                 id_buyer: clerkId
             },
+            include : {
+                direccion:true
+            },
             orderBy: {
                 fecha: 'desc'
             }

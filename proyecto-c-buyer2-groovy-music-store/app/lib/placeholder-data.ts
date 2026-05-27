@@ -1,4 +1,5 @@
-import { Product, ProductSummary, ShippingEstimate } from './definitions';
+import { Product, ProductSummary } from './definitions';
+import { ShippingEstimate, ShipmentResponse } from "./definitions";
 
 //SELLER APP
 export const mockProducts: Product[] = [
@@ -169,4 +170,20 @@ export const simularCalculoEnvio = (
     costo: 5500, 
     fechaEntregaEstimada: 3
   };
+};
+
+export const mockShipments: Record<string, ShipmentResponse> = {
+    // Usamos el número de orden como clave
+    "15": {
+        id: "ext_15_groovy",
+        codigoSeguimiento: "OCA-987654321",
+        estado: "en_transito",
+        fechaEntregaEstimada: "2026-05-30T10:00:00Z"
+    },
+    "16": {
+        id: "ext_16_groovy",
+        codigoSeguimiento: "AND-123456789",
+        estado: "entregado",
+        fechaEntregaEstimada: "2026-05-20T14:30:00Z"
+    }
 };

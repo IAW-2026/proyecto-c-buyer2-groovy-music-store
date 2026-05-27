@@ -77,7 +77,7 @@ export default async function OrdersPage() {
                                         Ver detalles
                                     </Link>
                                     
-                                    <TrackOrderButton orderId={order.nro_orden_usuario} />
+                                    <TrackOrderButton orderId={order.nro_orden_usuario} direccion={order.direccion} />  
                                 </div>
                             </div>
                         </div>

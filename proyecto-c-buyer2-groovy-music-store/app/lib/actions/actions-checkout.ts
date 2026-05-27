@@ -17,7 +17,7 @@ export async function procesarCheckout(formData: FormData) {
             data: {
                 //datos mockeados, acomodarlos
                 monto: total,
-                estado: 'PENDIENTE',
+                estado: 'Pendiente',
                 empresa_envio: 'Logística Standard',
                 
                 id_seller: sellerId, 
@@ -48,5 +48,5 @@ export async function procesarCheckout(formData: FormData) {
     });
 
     // Redirigimos usando el número amigable (nro_orden_usuario)
-    redirect('/checkout/pago');
+    redirect(`/checkout/pago/${nuevaOrden.nro_orden_usuario}`);
 }

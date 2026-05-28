@@ -87,7 +87,7 @@ export default async function CatalogPage() {
                                 
                                 <div className="mt-auto flex items-center justify-between border-t border-border pt-4">
                                     <div className="font-syne font-bold text-lg text-foreground">
-                                        ${p.precio.toFixed(2)}
+                                        ${(p.precio || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                                     </div>
                                     <span className="font-dm bg-primary text-white px-3.5 py-1.5 rounded-md text-sm font-medium hover:opacity-90 transition-opacity">
                                         Ver detalles

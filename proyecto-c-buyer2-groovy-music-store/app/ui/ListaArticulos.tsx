@@ -20,9 +20,13 @@ export default function ListaArticulos({ items }: ListaArticulosProps) {
                         <p className="text-sm text-foreground/70 mt-1">Cantidad: {item.cantidad}</p>
                     </div>
                     <div className="text-right shrink-0">
-                        <p className="font-syne font-bold text-xl">${(item.precio * item.cantidad).toFixed(2)}</p>
+                        <p className="font-syne font-bold text-xl">
+                            ${((item.precio * item.cantidad) || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
+                            </p>
                         {item.cantidad > 1 && (
-                            <p className="text-xs text-foreground/60 mt-1">${item.precio.toFixed(2)} c/u</p>
+                            <p className="text-xs text-foreground/60 mt-1">
+                                 ${(item.precio  || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })} c/u
+                            </p>
                         )}
                     </div>
                 </div>

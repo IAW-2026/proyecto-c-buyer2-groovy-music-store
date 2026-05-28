@@ -144,7 +144,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                                         <div className="flex flex-col items-end gap-1.5 shrink-0">
                                                             {/* Precio total de este item */}
                                                             <div className="text-[13px] font-semibold text-foreground font-syne">
-                                                                ${(item.producto.precio * item.cantidad).toFixed(2)}
+                                                                ${(item.producto.precio * item.cantidad || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                                                             </div>
                                                             
                                                             {/* Acciones: selector de cantidad y tacho de basura */}
@@ -196,7 +196,9 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                         <div className="border-t border-border pt-3 flex flex-col gap-2">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-xs text-foreground/60 font-dm">Subtotal:</span>
-                                                <span className="text-sm font-semibold text-foreground font-syne">${subtotal.toFixed(2)}</span>
+                                                <span className="text-sm font-semibold text-foreground font-syne">
+                                                    ${(subtotal || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
+                                                </span>
                                             </div>
                                             <Link 
                                                 href={`/checkout?seller=${encodeURIComponent(idSellerReal)}`}

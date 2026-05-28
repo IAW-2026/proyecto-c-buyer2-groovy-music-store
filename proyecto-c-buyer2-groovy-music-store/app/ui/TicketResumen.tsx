@@ -33,17 +33,17 @@ export default function TicketResumen({
                 
                 <div className="flex justify-between items-center mb-3 text-foreground/80">
                     <span>Subtotal (productos)</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    <span className="font-medium">${(subtotal|| 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })} </span>
                 </div>
                 
                 <div className="flex justify-between items-center mb-6 text-foreground/80">
                     <span>Envío ({envio.fechaEntregaEstimada} días aprox.)</span>
-                    <span className="font-medium">${envio.costo.toFixed(2)}</span>
+                    <span className="font-medium">${(envio.costo || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}</span>
                 </div>
 
                 <div className="flex justify-between items-center border-t border-border pt-5 mb-8">
                     <span className="font-syne font-bold text-lg">Total</span>
-                    <span className="font-syne font-bold text-3xl text-primary">${total.toFixed(2)}</span>
+                    <span className="font-syne font-bold text-3xl text-primary">${(total|| 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}</span>
                 </div>
 
                 {/* Inputs ocultos que van a viajar en el FormData al confirmar */}

@@ -56,7 +56,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                         )}
                         
                         <div className="font-syne text-3xl font-semibold text-foreground mb-8">
-                            ${product.precio.toFixed(2)}
+                            ${(product.precio || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                         </div>
                         
                         <div className="flex flex-col gap-4 mb-8 bg-background p-6 rounded-lg border border-border font-dm">

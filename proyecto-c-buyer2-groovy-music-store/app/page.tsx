@@ -4,12 +4,20 @@ import Link from "next/link";
 import SimpleNavBar from "./ui/SimpleNavBar";
 
 export default async function Home() {
+  const { sessionClaims } = await auth();
   const { userId } = await auth(); 
+
+  //si el usuario es admin, lo mandamos directo a admin
+  if (sessionClaims?.roles == "admin") {
+    redirect("/admin");
+  }
+
 
   // Si el usuario ya está logueado, lo mandamos directo al catálogo
   if (userId) {
     redirect('/catalogo'); 
   }
+
 
   // Si no está logueado:
   return (

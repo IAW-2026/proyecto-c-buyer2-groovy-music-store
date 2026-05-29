@@ -24,6 +24,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
     const sellerId = params.seller;
     const { userId: clerkId } = await auth(); 
 
+    //chequeo de que no sean nulos para poder usarlo en las consultas.
     if (!sellerId || !clerkId) {
         redirect('/');
     }

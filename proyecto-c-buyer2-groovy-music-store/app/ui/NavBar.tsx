@@ -28,15 +28,15 @@ export default function NavBar () {
                         <UserCircleIcon className="w-5 h-5 md:w-5 md:h-5" />
                     </Link>
 
+                    {/* Componente del Carrito Original */}
+                    <CartServer />
+
                     {/* Botón Salir con Clerk */}
                     <SignOutButton redirectUrl="/">
                         <button className="flex items-center gap-2 hover:opacity-80 transition-opacity text-sm font-medium tracking-wide cursor-pointer bg-transparent border-none text-white" title="Salir">
                             <ArrowRightEndOnRectangleIcon className="w-5 h-5 md:w-5 md:h-5" />
                         </button>
                     </SignOutButton>
-
-                    {/* Componente del Carrito Original */}
-                    <CartServer />
                 </div>
             </nav>
         </>

@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ShoppingCartIcon, TrashIcon, PlusIcon, MinusIcon } from '@heroicons/react/24/outline';
+import { ShoppingCartIcon, TrashIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
-
 
 import { actualizarCantidadItemBD, eliminarItemBD } from '@/app/lib/actions/actions-cart';
 // Tipos
@@ -17,6 +16,9 @@ interface CartDropdownProps {
 export default function CartDropdown({ items }: CartDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [cartItems, setCartItems] = useState<HydratedCartItem[]>(items);
+    
+    // Estado para controlar si se muestra el mensaje de aviso
+    const [mostrarAviso, setMostrarAviso] = useState(true);
 
     // Si el servidor manda datos nuevos (por un revalidatePath), actualizamos el estado local
     useEffect(() => {
@@ -95,27 +97,37 @@ export default function CartDropdown({ items }: CartDropdownProps) {
 
             {isOpen && (
                 <div className="absolute right-0 mt-4 w-[300px] sm:w-[360px] bg-card border border-border rounded-xl shadow-lg z-50 flex flex-col max-h-[70vh]">
-                    <div className="p-4 border-b border-border bg-black/5 rounded-t-xl">
+                    <div className="p-4 border-b border-border bg-black/5 rounded-t-xl shrink-0">
                         <h3 className="m-0 text-base font-semibold text-foreground font-syne">
                             Productos en tu carrito
                         </h3>
                     </div>
 
-                    <div className="overflow-y-auto p-4 flex flex-col gap-6">
+                    <div className="overflow-y-auto p-4 flex flex-col gap-5 relative">
+                        
+                        {/* Mensaje Informativo Descartable */}
+                        {mostrarAviso && cartItems.length > 0 && Object.keys(groupedCart).length > 1 && (
+                            <div className="relative bg-[#f8f9fa] border border-border rounded-lg p-3 pr-8 text-[12px] text-foreground/80 font-dm leading-snug shadow-sm">
+                                <button 
+                                    onClick={() => setMostrarAviso(false)}
+                                    className="absolute top-2 right-2 text-foreground/40 hover:text-foreground transition-colors p-1"
+                                    title="Cerrar aviso"
+                                >
+                                    <XMarkIcon className="w-4 h-4" />
+                                </button>
+                                <strong>Nota:</strong> Los productos están agrupados porque pertenecen a distintos vendedores. Deberás iniciar la compra de cada grupo por separado.
+                            </div>
+                        )}
+
                         {cartItems.length === 0 ? (
                             <p className="text-center text-foreground/60 my-4 text-sm">Tu carrito está vacío</p>
                         ) : (
                             Object.entries(groupedCart).map(([vendedorId, itemsDelVendedor]) => {
                                 const idSellerReal = itemsDelVendedor[0].producto.seller_id.id;
                                 const subtotal = itemsDelVendedor.reduce((acc, item) => acc + (item.producto.precio * item.cantidad), 0);
-                                
-                                // ... sigue igual
 
                                 return (
                                     <div key={vendedorId} className="border border-border rounded-lg p-3 bg-white shadow-sm">
-                                        <h4 className="m-0 mb-3 text-[13px] font-semibold text-foreground border-b border-border pb-1.5 font-dm">
-                                            Vendedor: <span className="text-primary">{vendedorId}</span>
-                                        </h4>
                                         
                                         <ul className="list-none p-0 m-0 mb-3 flex flex-col gap-4">
                                             {itemsDelVendedor.map((item) => {
@@ -184,7 +196,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                                             {/* Mensaje de stock máximo */}
                                                             {reachedMax && item.producto.stock > 0 && (
                                                                 <span className="text-[10px] text-orange-500 block text-right">
-                                                                    Solo quedan {item.producto.stock} unidades
+                                                                    Solo {item.producto.stock === 1 ? 'queda' : 'quedan'} {item.producto.stock} {item.producto.stock === 1 ? 'unidad' : 'unidades'}
                                                                 </span>
                                                             )}
                                                         </div>

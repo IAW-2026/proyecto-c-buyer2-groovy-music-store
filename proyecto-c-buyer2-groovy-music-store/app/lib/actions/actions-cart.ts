@@ -4,8 +4,8 @@ import prisma from '@/app/lib/prisma';
 import { auth, currentUser } from '@clerk/nextjs/server'; 
 import { revalidatePath } from 'next/cache';
 
-// 1. Modificamos la firma para recibir también el id_seller
-export async function agregarAlCarrito(producto_id: string, id_seller: string) {
+
+export async function agregarAlCarrito(producto_id: string, id_seller: string, cantidad_a_agregar: number = 1) {
     const { userId } = await auth();
     if (!userId) throw new Error("Debes iniciar sesión para comprar");
 
@@ -48,7 +48,6 @@ export async function agregarAlCarrito(producto_id: string, id_seller: string) {
                 id_carrito_producto_id: {
                     id_carrito: carrito.id_carrito,
                     producto_id: producto_id
-
                 }
             }
         });
@@ -61,14 +60,14 @@ export async function agregarAlCarrito(producto_id: string, id_seller: string) {
                         producto_id: producto_id
                     }
                 },
-                data: { cantidad: itemExistente.cantidad + 1 }
+                data: { cantidad: itemExistente.cantidad + cantidad_a_agregar }
             });
         } else {
             await prisma.itemCarrito.create({
                 data: {
                     id_carrito: carrito.id_carrito,
                     producto_id: producto_id,
-                    cantidad: 1,
+                    cantidad: cantidad_a_agregar, 
                     id_seller: id_seller 
                 }
             });

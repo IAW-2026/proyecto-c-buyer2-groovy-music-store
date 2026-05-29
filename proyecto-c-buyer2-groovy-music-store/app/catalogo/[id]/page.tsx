@@ -2,31 +2,61 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
-// componentes
+// Componentes
 import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
 import BotonAgregarCarrito from '@/app/ui/BotonAgregarCarrito'
 import NavBar from '@/app/ui/NavBar'
 
+// Servicio externo
 import { getFullProduct } from '@/app/lib/services/seller-api'
+
+// Autenticación
+import { auth } from '@clerk/nextjs/server'
+
+// Conexión única de Prisma
+import  prisma from '@/app/lib/prisma'
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
     
-    // Resolvemos la URL
     const resolvedParams = await params;
     
-    // Buscamos el producto especifico en la lista de productos 
     const product = await getFullProduct(resolvedParams.id);
 
     if (!product) notFound()
 
+    const { userId } = await auth();
+    let cantidadYaEnCarrito = 0;
+
+    // Consulta a la base de datos local usando la conexión única de Prisma
+    if (userId) {
+        try {
+            const itemExistente = await prisma.itemCarrito.findFirst({
+                where: {
+                    producto_id: product.id,
+                    carrito: {
+                        clerk_id: userId
+                    }
+                }
+            });
+
+            if (itemExistente) {
+                cantidadYaEnCarrito = itemExistente.cantidad;
+            }
+        } catch (error) {
+            console.error("Error al consultar la cantidad en el carrito local:", error);
+        }
+    }
+
+    // Calculamos el stock que el usuario todavía puede añadir
+    const stockDisponible = Math.max(0, product.stock - cantidadYaEnCarrito);
+
     return (
         <main className="min-h-screen bg-background font-dm pb-20">
             
-            {/* BARRA DE NAVEGACIÓN SUPERIOR  */}
+            {/* BARRA DE NAVEGACIÓN SUPERIOR */}
             <NavBar />
 
-            
-            {/* BARRA DE NAVEGACIÓN SECUNDARIA  */}
+            {/* BARRA DE NAVEGACIÓN SECUNDARIA */}
             <div className="flex items-center justify-between px-8 py-3 bg-foreground text-white/50 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
                 <Link href="/catalogo" className="flex items-center gap-2 hover:text-white transition-colors">
                     <ArrowLeftIcon className="w-4 h-4" />
@@ -75,7 +105,9 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                             <div className="flex justify-between">
                                 <span className="text-foreground/70">Disponibilidad</span>
                                 <span className={`font-semibold tracking-wide ${product.stock > 0 ? 'text-green-700' : 'text-[#E25938]'}`}>
-                                    {product.stock > 0 ? `${product.stock} unidades` : 'Agotado'}
+                                    {product.stock > 0 
+                                        ? `${product.stock} ${product.stock === 1 ? 'unidad' : 'unidades'}` 
+                                        : 'Agotado'}
                                 </span>
                             </div>
                         </div>
@@ -83,7 +115,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                         <div className="mt-auto">
                             <BotonAgregarCarrito 
                                 productoId={product.id} 
-                                stock={product.stock} 
+                                stockTotal={product.stock} 
+                                stockDisponible={stockDisponible}
                                 sellerId={product.seller_id.id}
                             />
                         </div>

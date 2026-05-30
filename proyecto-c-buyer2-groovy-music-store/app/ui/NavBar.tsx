@@ -45,8 +45,8 @@ export default async function NavBar() {
                         {/* 2. Ícono de Perfil / Cuenta */}
                         <Link href="/account/profile" className="group flex items-center p-2 bg-transparent hover:bg-white/15 rounded-full transition-all duration-300 ease-in-out cursor-pointer">
                             <UserCircleIcon className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
-                            <span className="hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
-                                Mi Cuenta
+                            <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
+                                Mi Perfil
                             </span>
                         </Link>
 

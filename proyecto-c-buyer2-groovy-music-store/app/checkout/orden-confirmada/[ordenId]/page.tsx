@@ -3,6 +3,12 @@ import { redirect } from 'next/navigation';
 import SimpleNavBar from '@/app/ui/SimpleNavBar';
 import Link from 'next/link';
 
+import {Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Orden confirmada- Groovy Music Store",
+  description: "Confirmacion de orden de compra de Groovy Music Store." }
+
 export default async function OrdenConfirmadaPage({ params }: { params: Promise<{ ordenId: string }> }) {
     const resolvedParams = await params;
     const nroOrdenUsuario = parseInt(resolvedParams.ordenId);

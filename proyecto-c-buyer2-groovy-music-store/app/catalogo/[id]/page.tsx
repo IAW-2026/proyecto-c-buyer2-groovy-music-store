@@ -16,6 +16,14 @@ import { auth } from '@clerk/nextjs/server'
 // Conexión única de Prisma
 import  prisma from '@/app/lib/prisma'
 
+
+
+export const metadata = {
+    title: 'Catálogo - Groovy Music Store',
+    description: 'Página principal del catálogo de productos',
+}
+
+
 export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
     
     const resolvedParams = await params;

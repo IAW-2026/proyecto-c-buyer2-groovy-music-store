@@ -4,6 +4,12 @@ import Link from "next/link"
 import { getUserOrders } from "@/app/lib/actions/actions-order"
 import TrackOrderButton from "@/app/ui/TrackOrderButton"
 
+import {Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Mis pedidos - Groovy Music Store",
+  description: "Panel de pedidos de usuario de Groovy Music Store." }
+
 export default async function OrdersPage() {
     // 1. Obtener la sesión del usuario desde el servidor
     const user = await currentUser();

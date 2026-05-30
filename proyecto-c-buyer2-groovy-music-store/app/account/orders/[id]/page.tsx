@@ -6,6 +6,12 @@ import prisma from "@/app/lib/prisma"
 import { ArrowLeftIcon } from "@heroicons/react/24/outline"
 import { getProductQuickDetail } from "@/app/lib/services/seller-api" 
 
+import {Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Mis pedidos - Groovy Music Store",
+  description: "Panel de pedidos de usuario de Groovy Music Store." }
+
 export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     
     const user = await currentUser();

@@ -31,10 +31,10 @@ export default async function NavBar() {
             {/* Íconos Derechos */}
             <div className="flex items-center gap-1 md:gap-2 ml-auto">
                 
-                {/* 1. Búsqueda (Siempre visible) */}
+                {/* 1. Búsqueda  */}
                 <button className="group flex items-center p-2 bg-transparent hover:bg-white/15 rounded-full transition-all duration-300 ease-in-out cursor-pointer border-none text-white">
                     <MagnifyingGlassIcon className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
-                    <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[80px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
+                    <span className="hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[80px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
                         Buscar
                     </span>
                 </button>
@@ -45,21 +45,19 @@ export default async function NavBar() {
                         {/* 2. Ícono de Perfil / Cuenta */}
                         <Link href="/account/profile" className="group flex items-center p-2 bg-transparent hover:bg-white/15 rounded-full transition-all duration-300 ease-in-out cursor-pointer">
                             <UserCircleIcon className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
-                            <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
+                            <span className="hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[100px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
                                 Mi Cuenta
                             </span>
                         </Link>
 
-                        {/* 3. Carrito (Restaurado a su versión original) */}
-                        <div className="p-2 rounded-full hover:bg-white/20 transition-colors flex items-center justify-center cursor-pointer">
-                            <CartServer />
-                        </div>
+                        {/* 3. Carrito */}
+                        <CartServer />
 
                         {/* 4. Botón Salir */}
                         <SignOutButton redirectUrl="/">
                             <button className="group flex items-center p-2 bg-transparent hover:bg-white/15 rounded-full transition-all duration-300 ease-in-out cursor-pointer border-none text-white">
                                 <ArrowRightEndOnRectangleIcon className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
-                                <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
+                                <span className="hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[60px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
                                     Salir
                                 </span>
                             </button>
@@ -70,7 +68,7 @@ export default async function NavBar() {
                         {/* Ícono de Ingresar */}
                         <Link href="/sign-in" className="group flex items-center p-2 bg-transparent hover:bg-white/15 rounded-full transition-all duration-300 ease-in-out cursor-pointer">
                             <UserCircleIcon className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
-                            <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[90px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
+                            <span className="hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[90px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
                                 Ingresar
                             </span>
                         </Link>
@@ -78,7 +76,7 @@ export default async function NavBar() {
                         {/* Ícono de Registrarse */}
                         <Link href="/sign-up" className="group flex items-center p-2 bg-transparent hover:bg-white/15 rounded-full transition-all duration-300 ease-in-out cursor-pointer">
                             <UserPlusIcon className="w-5 h-5 text-white/90 group-hover:text-white transition-colors" />
-                            <span className="max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
+                            <span className="hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
                                 Registrarse
                             </span>
                         </Link>

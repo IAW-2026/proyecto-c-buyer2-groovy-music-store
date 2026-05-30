@@ -6,7 +6,6 @@ import { ShoppingCartIcon, TrashIcon, PlusIcon, MinusIcon, XMarkIcon } from '@he
 import Link from 'next/link';
 
 import { actualizarCantidadItemBD, eliminarItemBD } from '@/app/lib/actions/actions-cart';
-// Tipos
 import type { HydratedCartItem } from '@/app/lib/definitions';
 
 interface CartDropdownProps {
@@ -17,10 +16,8 @@ export default function CartDropdown({ items }: CartDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [cartItems, setCartItems] = useState<HydratedCartItem[]>(items);
     
-    // Estado para controlar si se muestra el mensaje de aviso
     const [mostrarAviso, setMostrarAviso] = useState(true);
 
-    // Si el servidor manda datos nuevos (por un revalidatePath), actualizamos el estado local
     useEffect(() => {
         setCartItems(items);
     }, [items]);
@@ -37,15 +34,12 @@ export default function CartDropdown({ items }: CartDropdownProps) {
 
         if (nuevaCantidad === item.cantidad) return; 
 
-        // 1. Actualización visual instantánea
         setCartItems(prev => prev.map(i => 
             i.producto_id === producto_id ? { ...i, cantidad: nuevaCantidad } : i
         ));
 
-        // 2. Ejecutar Action en BD
         const result = await actualizarCantidadItemBD(id_carrito, producto_id, nuevaCantidad);
         
-        // 3. Revertir si hubo error en BD
         if (!result.success) {
             console.error(result.error);
             setCartItems(prev => prev.map(i => 
@@ -57,20 +51,16 @@ export default function CartDropdown({ items }: CartDropdownProps) {
     const handleRemoveItem = async (id_carrito: string, producto_id: string) => {
         const itemAEliminar = cartItems.find(i => i.producto_id === producto_id);
         
-        // 1. Borrado visual instantáneo
         setCartItems(prev => prev.filter(i => i.producto_id !== producto_id));
 
-        // 2. Ejecutar Action en BD
         const result = await eliminarItemBD(id_carrito, producto_id);
         
-        // 3. Revertir si hubo error en BD
         if (!result.success && itemAEliminar) {
             console.error(result.error);
             setCartItems(prev => [...prev, itemAEliminar]);
         }
     };
 
-    // Agrupación por Vendedor
     const groupedCart = cartItems.reduce((acc, item) => {
         const sellerId = item.producto.seller_id?.id || 'Vendedor Desconocido';
         if (!acc[sellerId]) acc[sellerId] = [];
@@ -82,19 +72,29 @@ export default function CartDropdown({ items }: CartDropdownProps) {
 
     return (
         <div className="relative font-dm">
+            {/* BOTÓN EXPANDIBLE */}
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center justify-center p-2 hover:opacity-80 transition-opacity text-white relative bg-transparent border-none cursor-pointer"
+                className="group flex items-center p-2 bg-transparent hover:bg-white/15 active:bg-white/20 rounded-full transition-all duration-300 ease-in-out cursor-pointer border-none text-white"
                 title="Carrito"
             >
-                <ShoppingCartIcon className="w-5 h-5" />
-                {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#2E2E2E] text-[10px] font-bold text-white">
-                        {totalItems}
-                    </span>
-                )}
+                {/* Contenedor relativo para anclar la burbuja al ícono */}
+                <div className="relative flex items-center justify-center text-white/90 group-hover:text-white transition-colors">
+                    <ShoppingCartIcon className="w-5 h-5" />
+                    {totalItems > 0 && (
+                        <span className="absolute -top-1.5 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#2E2E2E] text-[10px] font-bold text-white border border-primary/50">
+                            {totalItems}
+                        </span>
+                    )}
+                </div>
+
+                {/* Texto expansivo (oculto en móvil, visible en md) */}
+                <span className="hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[80px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
+                    Carrito
+                </span>
             </button>
 
+            {/* DROPDOWN */}
             {isOpen && (
                 <div className="absolute right-0 mt-4 w-[300px] sm:w-[360px] bg-card border border-border rounded-xl shadow-lg z-50 flex flex-col max-h-[70vh]">
                     <div className="p-4 border-b border-border bg-black/5 rounded-t-xl shrink-0">
@@ -105,7 +105,6 @@ export default function CartDropdown({ items }: CartDropdownProps) {
 
                     <div className="overflow-y-auto p-4 flex flex-col gap-5 relative">
                         
-                        {/* Mensaje Informativo Descartable */}
                         {mostrarAviso && cartItems.length > 0 && Object.keys(groupedCart).length > 1 && (
                             <div className="relative bg-[#f8f9fa] border border-border rounded-lg p-3 pr-8 text-[12px] text-foreground/80 font-dm leading-snug shadow-sm">
                                 <button 
@@ -135,7 +134,6 @@ export default function CartDropdown({ items }: CartDropdownProps) {
 
                                                 return (
                                                     <li key={item.producto_id} className="flex gap-3 items-center border-b border-border pb-3 last:border-0 last:pb-0">
-                                                        {/* 1. Imagen */}
                                                         <div className="w-12 h-12 relative bg-gray-200 rounded shrink-0 overflow-hidden">
                                                             <Image 
                                                                 src={item.producto.imagen_principal || '/placeholder-record.png'} 
@@ -145,23 +143,18 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                                             />
                                                         </div>
                                                         
-                                                        {/* 2. Título del producto  */}
                                                         <div className="grow min-w-0">
                                                             <p className="m-0 text-[13px] font-medium text-foreground truncate font-syne">
                                                                 {item.producto.titulo}
                                                             </p>
                                                         </div>
                                                         
-                                                        {/* 3. Columna de Precio y Acciones */}
                                                         <div className="flex flex-col items-end gap-1.5 shrink-0">
-                                                            {/* Precio total de este item */}
                                                             <div className="text-[13px] font-semibold text-foreground font-syne">
                                                                 ${(item.producto.precio * item.cantidad || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                                                             </div>
                                                             
-                                                            {/* Acciones: selector de cantidad y tacho de basura */}
                                                             <div className="flex items-center gap-2">
-                                                                {/* Selector de cantidad  */}
                                                                 <div className="w-fit flex items-center border border-border rounded-md">
                                                                     <button 
                                                                         onClick={() => handleUpdateQuantity(item.id_carrito, item.producto_id, -1)}
@@ -183,7 +176,6 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                                                     </button>
                                                                 </div>
                                                                 
-                                                                {/* Tacho de Basura  */}
                                                                 <button 
                                                                     onClick={() => handleRemoveItem(item.id_carrito, item.producto_id)}
                                                                     className="text-gray-400 hover:text-red-500 transition-colors"
@@ -193,7 +185,6 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                                                                 </button>
                                                             </div>
                                                             
-                                                            {/* Mensaje de stock máximo */}
                                                             {reachedMax && item.producto.stock > 0 && (
                                                                 <span className="text-[10px] text-orange-500 block text-right">
                                                                     Solo {item.producto.stock === 1 ? 'queda' : 'quedan'} {item.producto.stock} {item.producto.stock === 1 ? 'unidad' : 'unidades'}

@@ -12,13 +12,15 @@ export default function GaleriaInteractiva({ imagenes }: { imagenes: string[] })
     const prevImage = () => setCurrentImageIndex((prev) => (prev - 1 + totalImages) % totalImages);
 
     return (
-        <div className="relative w-full aspect-square bg-[#e9e9e9] rounded-xl overflow-hidden border border-[var(--divider)] group">
+        <div className="w-full aspect-square relative bg-[#f8f8f8] border border-gray-200 rounded-xl overflow-hidden p-4 flex items-center justify-center group">
+            
             <Image 
                 src={imagenes[currentImageIndex] || '/placeholder-record.png'} 
-                alt="Imagen del producto"
+                alt="Imagen del producto" 
                 fill 
-                className="object-cover transition-opacity duration-300"
-                priority={currentImageIndex === 0}
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-contain p-4 transition-transform duration-300 hover:scale-105"
             />
 
             {/* FLECHAS: Solo se muestran si hay más de 1 imagen */}

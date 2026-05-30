@@ -1,6 +1,13 @@
 import SimpleNavBar from "@/app/ui/SimpleNavBar";
 import { SignUp } from "@clerk/nextjs";
 
+import {Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: "Registrarse - Groovy Music Store",
+  description: "Crea una nueva cuenta en Groovy Music Store.",
+};
+
 interface SignUpPageProps {
   searchParams: Promise<{ returnTo?: string }>;
 }

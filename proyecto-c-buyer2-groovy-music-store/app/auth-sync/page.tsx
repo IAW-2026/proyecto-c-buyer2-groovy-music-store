@@ -12,13 +12,14 @@ interface AuthSyncProps {
 }
 
 export default async function AuthSyncPage({ searchParams }: AuthSyncProps) {
+    // 1. Verificamos el usuario
     const user = await currentUser();
 
     if (!user) {
         redirect('/');
     }
 
-    // Guardamos en Prisma
+    // 2. Sincronizamos con el modelo "Usuario" de Prisma UNA SOLA VEZ
     await prisma.usuario.upsert({
         where: { clerk_id: user.id },
         update: {

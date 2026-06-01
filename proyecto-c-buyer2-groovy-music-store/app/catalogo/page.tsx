@@ -15,23 +15,13 @@ export const metadata = {
 }
 
 
-// export default async function CatalogPage() {
-//     const products = await getCatalog();
-
-//     // 1. Obtenemos la info del usuario desde Clerk
-//     const user = await currentUser();
-//     const displayName = user?.firstName ?? 'coleccionista';
 export default async function CatalogPage() {
-   
-
-    
     const products = await getCatalog();
-    
 
-    
+    // 1. Obtenemos la info del usuario desde Clerk
     const user = await currentUser();
     const displayName = user?.firstName ?? 'coleccionista';
-    
+
 
     return (
         <main className="min-h-screen bg-background font-dm pb-20">

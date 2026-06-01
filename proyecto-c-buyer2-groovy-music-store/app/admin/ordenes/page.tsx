@@ -2,7 +2,8 @@ import AdminNavBar from '@/app/ui/AdminNavBar'
 import Link from 'next/link'
 import prisma from "@/app/lib/prisma"
 import { actualizarOrden } from '@/app/lib/actions/actions-admin'
-import { getProductQuickDetail } from '@/app/lib/services/seller-api' 
+import { getProductQuickDetail } from '@/app/lib/services/seller-api'
+import FormularioActualizarOrden from '@/app/ui/FormularioActualizarOrden';
 
 export const metadata = { title: 'Órdenes - Admin Groovy' }
 
@@ -124,39 +125,7 @@ export default async function AdminOrdenesPage({ searchParams }: { searchParams:
                                     </td>
                                     
                                     <td className="p-4 align-top">
-                                        {/* Formulario completo para actualizar el registro */}
-                                        <form action={actualizarOrden} className="flex flex-col gap-2 p-3 bg-background/40 rounded-lg border border-border/60 max-w-[180px] mx-auto">
-                                            <input type="hidden" name="nro_orden" value={orden.nro_orden} />
-                                            
-                                            <div className="flex flex-col gap-0.5">
-                                                <span className="text-[10px] uppercase font-bold text-foreground/50">Estado:</span>
-                                                <select 
-                                                    name="estado" 
-                                                    defaultValue={orden.estado}
-                                                    className="bg-background border border-border text-foreground text-xs rounded p-1 outline-none focus:border-primary font-medium"
-                                                >
-                                                    <option value="Pendiente">Pendiente</option>
-                                                    <option value="Pagado">Pagado</option>
-                                                    <option value="Enviado">Enviado</option>
-                                                    <option value="Cancelado">Cancelado</option>
-                                                </select>
-                                            </div>
-
-                                            <div className="flex flex-col gap-0.5">
-                                                <span className="text-[10px] uppercase font-bold text-foreground/50">Transporte:</span>
-                                                <input 
-                                                    type="text" 
-                                                    name="empresa_envio" 
-                                                    defaultValue={orden.empresa_envio || ""}
-                                                    placeholder="Ej: Correo Arg."
-                                                    className="bg-background border border-border text-foreground text-xs rounded p-1 outline-none focus:border-primary w-full"
-                                                />
-                                            </div>
-
-                                            <button type="submit" className="bg-primary text-white hover:opacity-90 px-2 py-1 rounded text-xs font-bold transition-opacity mt-1 w-full uppercase tracking-wider">
-                                                Aplicar
-                                            </button>
-                                        </form>
+                                        <FormularioActualizarOrden orden={orden} />
                                     </td>
                                 </tr>
                             ))}

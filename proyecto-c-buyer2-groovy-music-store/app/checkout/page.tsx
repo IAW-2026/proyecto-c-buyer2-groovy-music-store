@@ -4,15 +4,9 @@ import prisma from '@/app/lib/prisma';
 import SimpleNavBar from '../ui/SimpleNavBar';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import SelectorDireccion from '../ui/SelectorDireccion';
-import { procesarCheckout } from '@/app/lib/actions/actions-checkout';
-
 import { getProductQuickDetail } from '../lib/services/seller-api';
 import { getShippingEstimate } from '../lib/services/shipping-api'; 
-
-
-import ListaArticulos from '../ui/ListaArticulos';
-import TicketResumen from '../ui/TicketResumen';
+import FormularioCheckout from '../ui/FormularioCheckout'; // Importamos el componente nuevo
 
 export const metadata = {
     title: 'Checkout - Groovy Music Store',
@@ -24,7 +18,6 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
     const sellerId = params.seller;
     const { userId: clerkId } = await auth(); 
 
-    //chequeo de que no sean nulos para poder usarlo en las consultas.
     if (!sellerId || !clerkId) {
         redirect('/');
     }
@@ -45,7 +38,6 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
     const itemsBorrador = await Promise.all(
         itemsDb.map(async (item) => {
             const detalle = await getProductQuickDetail(item.producto_id);
-            
             return detalle ? { cantidad: item.cantidad, ...detalle } : null;
         })
     );
@@ -74,26 +66,15 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
                     </p>
                 </header>
             
-                {/* Formulario que encapsula toda la estructura e inyecta la Server Action */}
-                <form action={procesarCheckout} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-8">
-                        <div>
-                            <h2 className="text-2xl font-syne font-semibold mb-4">Artículos en la orden</h2>
-                            <ListaArticulos items={itemsParaCheckout} />
-                        </div>
-
-                        <SelectorDireccion direcciones={direccionesDb} clerkId={clerkId} />
-                    </div>
-
-                    <TicketResumen 
-                        subtotal={subtotal} 
-                        envio={envio} 
-                        total={totalAPagar} 
-                        sellerId={sellerId} 
-                        clerkId={clerkId} 
-                        items={itemsParaCheckout} 
-                    />
-                </form>
+                <FormularioCheckout 
+                    itemsParaCheckout={itemsParaCheckout}
+                    direccionesDb={direccionesDb}
+                    clerkId={clerkId}
+                    sellerId={sellerId}
+                    subtotal={subtotal}
+                    envio={envio}
+                    totalAPagar={totalAPagar}
+                />
             </div>
         </main>
     );

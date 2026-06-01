@@ -6,9 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate",
+    "db:reset": "dotenv -e .env.local -- prisma db push --force-reset",
+    "db:migrate": "dotenv -e .env.local -- prisma migrate dev"
   },
   "dependencies": {
+    "@clerk/localizations": "^4.6.8",
+    "@clerk/nextjs": "^7.3.7",
+    "@heroicons/react": "^2.2.0",
+    "@prisma/client": "^6.19.3",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4"
@@ -18,8 +25,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^11.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

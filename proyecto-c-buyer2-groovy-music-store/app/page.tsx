@@ -64,45 +64,39 @@ export default async function Home() {
                     {/* RENDERIZADO CONDICIONAL SEGÚN SESIÓN */}
                     {!userId ? (
                         <>
-
                             <p
                                 className="text-white/50 text-sm mb-6 tracking-wider"
-                                style={{ letterSpacing: "0.1em" }}
+                                style={{ letterSpacing: "0.12em" }} // Ajusté un poco el espaciado para coherencia
                             >
                                 Iniciá sesión o registrate para comenzar a comprar
                             </p>
 
-                            {/* Auth buttons */}
+                            {/* Auth buttons*/}
                             <div className="flex flex-col sm:flex-row items-center gap-4 mb-16">
                                 
                                 {/* Iniciar sesión */}
-                                <SignInButton forceRedirectUrl="/auth-sync">
-                                    <button 
-                                        className="group flex items-center gap-3 px-8 py-3.5 bg-primary text-white rounded-full hover:opacity-90 transition-all hover:scale-105 shadow-lg shadow-primary/20"
-                                        style={{ letterSpacing: "0.08em" }}
-                                    >
-                                        <UserIcon className="w-4 h-4" />
-                                        <span className="text-sm font-medium tracking-widest uppercase" style={{ letterSpacing: "0.12em" }}>
-                                            Iniciar sesión
-                                        </span>
-                                        <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                                    </button>
-                                </SignInButton>
+                                <Link 
+                                    href="/sign-in" 
+                                    className="group flex items-center gap-3 px-8 py-3.5 bg-primary text-white rounded-full hover:opacity-90 transition-all hover:scale-105 shadow-lg shadow-primary/20"
+                                >
+                                    <UserIcon className="w-4 h-4" />
+                                    <span className="text-sm font-medium tracking-widest uppercase">
+                                        Iniciar sesión
+                                    </span>
+                                    <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                </Link>
 
-                                {/* Registrarse */}
-                                <SignUpButton forceRedirectUrl="/auth-sync">
-                                    <button 
-                                        className="group flex items-center gap-3 px-8 py-3.5 bg-transparent border border-white/30 text-white rounded-full hover:border-white/70 hover:bg-white/10 transition-all hover:scale-105 backdrop-blur-sm"
-                                        style={{ letterSpacing: "0.08em" }}
-                                    >
-                                        <UserPlusIcon className="w-4 h-4" />
-                                        <span className="text-sm font-medium tracking-widest uppercase" style={{ letterSpacing: "0.12em" }}>
-                                            Registrarse
-                                        </span>
-                                        <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                                    </button>
-                                </SignUpButton>
-
+                                {/* Registrarse  */}
+                                <Link 
+                                    href="/sign-up" 
+                                    className="group flex items-center gap-3 px-8 py-3.5 bg-transparent border border-white/30 text-white rounded-full hover:border-white/70 hover:bg-white/10 transition-all hover:scale-105 backdrop-blur-sm"
+                                >
+                                    <UserPlusIcon className="w-4 h-4" />
+                                    <span className="text-sm font-medium tracking-widest uppercase">
+                                        Registrarse
+                                    </span>
+                                    <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                </Link>
                             </div>
 
                             {/* Continuar sin cuenta */}
@@ -117,6 +111,7 @@ export default async function Home() {
                             </Link>
                         </>
                     ) : (
+                    
                         <>
                             {/* ESTADO LOGUEADO:  no le pedimos registrarse */}
                             <Link

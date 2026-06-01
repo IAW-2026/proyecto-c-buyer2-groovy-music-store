@@ -19,7 +19,6 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
     const searchParams = useSearchParams();
     const router = useRouter();
     
-    // Agregamos isLoaded para saber si Clerk ya terminó de revisar la sesión
     const { isSignedIn, isLoaded } = useAuth(); 
 
     const [showModal, setShowModal] = useState(false);
@@ -27,18 +26,14 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
     const [fueAgregado, setFueAgregado] = useState(false);
     const [cantidad, setCantidad] = useState(1);
 
-    // Ref para evitar que React dispare el agregado dos veces seguidas por accidente
     const procesadoRef = useRef(false);
 
     useEffect(() => {
-        // Si Clerk terminó de cargar, estamos logueados, y la URL tiene la orden "autoAdd"
         if (isLoaded && isSignedIn && searchParams.get('autoAdd') === 'true' && !procesadoRef.current) {
-            procesadoRef.current = true; // Marcamos para que no se repita
+            procesadoRef.current = true; 
             
-            // Leemos la cantidad que el usuario había elegido antes de loguearse
             const cantidadGuardada = Number(searchParams.get('qty')) || 1;
 
-            // Disparamos la acción de agregar al carrito automáticamente
             startTransition(async () => {
                 const resultado = await agregarAlCarrito(productoId, sellerId, cantidadGuardada);
                 
@@ -50,7 +45,6 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
                 }
             });
 
-            // Limpiamos la URL (borramos el ?autoAdd) para que si recarga la página no se vuelva a agregar
             router.replace(pathname, { scroll: false });
         }
     }, [isLoaded, isSignedIn, searchParams, pathname, router, productoId, sellerId]);
@@ -85,50 +79,78 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
         });
     };
 
-    let botonColor = 'bg-[var(--accent-terracotta)] hover:opacity-90';
+    // Estilos dinámicos adaptados al "Ver detalles" del catálogo
+    let botonColor = 'bg-primary border-primary-dark shadow-md text-shadow-contrast hover:bg-[#B83A15] hover:scale-[1.02] hover:shadow-lg';
     let botonTexto = 'Agregar al carrito';
     let clasesExtra = ''; 
 
     if (stockTotal === 0) {
         botonTexto = 'Sin stock';
-        botonColor = 'bg-gray-500';
-        clasesExtra = 'opacity-40 cursor-not-allowed';
+        botonColor = 'bg-gray-500 border-gray-600 shadow-none';
+        clasesExtra = 'opacity-50 cursor-not-allowed hover:scale-100 hover:bg-gray-500';
     } else if (sinStockDisponible && stockTotal > 0) {
         botonTexto = 'Límite de stock en carrito';
-        botonColor = 'bg-gray-500';
-        clasesExtra = 'opacity-50 cursor-not-allowed';
+        botonColor = 'bg-gray-500 border-gray-600 shadow-none';
+        clasesExtra = 'opacity-50 cursor-not-allowed hover:scale-100 hover:bg-gray-500';
     } else if (isPending) {
         botonTexto = 'Procesando...';
-        botonColor = 'bg-gray-500';
-        clasesExtra = 'opacity-80 cursor-wait';
+        botonColor = 'bg-gray-500 border-gray-600 shadow-none';
+        clasesExtra = 'opacity-80 cursor-wait hover:scale-100 hover:bg-gray-500';
     } else if (fueAgregado) {
         botonTexto = '¡Producto agregado!';
-        botonColor = 'bg-green-600'; 
-        clasesExtra = 'opacity-100 cursor-default'; 
+        botonColor = 'bg-green-700 border-green-800 shadow-none'; 
+        clasesExtra = 'opacity-100 cursor-default hover:scale-100 hover:bg-green-700'; 
     }
 
-    // Armamos la mochila para el login: Ruta actual + orden de autoAdd + cantidad elegida
     const rutaConOrden = `${pathname}?autoAdd=true&qty=${cantidad}`;
 
     return (
         <>
             <div className="flex items-center gap-4 w-full">
+                {/* SELECTOR DE CANTIDAD */}
                 {!sinStockDisponible && !isPending && !fueAgregado && (
                     <div className="flex items-center border border-border rounded-lg bg-background h-[60px]">
-                        <button onClick={handleDecrementar} disabled={cantidad <= 1} className="px-4 h-full hover:bg-gray-50 disabled:opacity-40 text-foreground transition-colors rounded-l-lg">
-                            <MinusIcon className="w-4 h-4" />
+                        
+                        {/* Botón Restar con aria-label */}
+                        <button 
+                            onClick={handleDecrementar} 
+                            disabled={cantidad <= 1} 
+                            aria-label="Disminuir cantidad"
+                            className="px-4 h-full hover:bg-gray-50 disabled:opacity-40 text-foreground transition-colors rounded-l-lg"
+                        >
+                            <MinusIcon className="w-4 h-4" aria-hidden="true" />
                         </button>
-                        <span className="px-2 text-lg font-bold min-w-[40px] text-center text-foreground select-none font-syne">{cantidad}</span>
-                        <button onClick={handleIncrementar} disabled={cantidad >= stockDisponible} className="px-4 h-full hover:bg-gray-50 disabled:opacity-40 text-foreground transition-colors rounded-r-lg" title={cantidad >= stockDisponible ? "Límite de stock alcanzado" : ""}>
-                            <PlusIcon className="w-4 h-4" />
+                        
+                        {/* Indicador de cantidad (aria-live para que el lector avise si cambia) */}
+                        <span aria-live="polite" className="px-2 text-lg font-bold min-w-[40px] text-center text-foreground select-none font-syne">
+                            {cantidad}
+                        </span>
+                        
+                        {/* Botón Sumar con aria-label */}
+                        <button 
+                            onClick={handleIncrementar} 
+                            disabled={cantidad >= stockDisponible} 
+                            aria-label="Aumentar cantidad"
+                            title={cantidad >= stockDisponible ? "Límite de stock alcanzado" : ""}
+                            className="px-4 h-full hover:bg-gray-50 disabled:opacity-40 text-foreground transition-colors rounded-r-lg" 
+                        >
+                            <PlusIcon className="w-4 h-4" aria-hidden="true" />
                         </button>
                     </div>
                 )}
-                <button onClick={handleAgregar} disabled={sinStockDisponible || isPending || fueAgregado} className={`flex-grow transition-all text-white font-bold h-[60px] rounded-lg text-lg font-syne ${botonColor} ${clasesExtra}`}>
+                
+                {/* BOTÓN PRINCIPAL */}
+                <button 
+                    onClick={handleAgregar} 
+                    disabled={sinStockDisponible || isPending || fueAgregado} 
+                    aria-label={botonTexto}
+                    className={`flex-grow flex items-center justify-center border-2 transition-all duration-200 text-white font-bold h-[60px] rounded-lg text-lg font-dm ${botonColor} ${clasesExtra}`}
+                >
                     {botonTexto}
                 </button>
             </div>
 
+            {/* MODAL (Se mantiene igual) */}
             {showModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1a1008]/80 backdrop-blur-md transition-opacity">
                     <div className="bg-card border border-border rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl relative animate-in fade-in zoom-in duration-200">
@@ -139,7 +161,7 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
                         <div className="flex flex-col gap-3">
                             <Link 
                                 href={`/sign-in?returnTo=${encodeURIComponent(rutaConOrden)}`}
-                                className="w-full bg-[var(--accent-terracotta)] text-white rounded-full py-3.5 text-[13px] font-bold tracking-[0.1em] uppercase hover:opacity-90 transition-all flex justify-center items-center"
+                                className="w-full bg-primary border-2 border-primary-dark text-shadow-contrast shadow-sm text-white rounded-full py-3.5 text-[13px] font-bold tracking-[0.1em] uppercase hover:bg-[#B83A15] hover:scale-[1.02] transition-all flex justify-center items-center"
                             >
                                 Iniciar Sesión
                             </Link>

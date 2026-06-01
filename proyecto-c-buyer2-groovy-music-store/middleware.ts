@@ -1,31 +1,22 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
-// Definimos qué rutas no requieren login
-const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)', '/catalogo(.*)']);
+// Agregamos /auth-sync a las rutas públicas para que no se bloquee
+const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)', '/catalogo(.*)', '/auth-sync(.*)']);
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { userId, sessionClaims } = await auth();
+  const { sessionClaims } = await auth();
+  
 
-  // 1. Redirección automática apenas inician sesión
-  // Si están logueados y están en la página principal ("/")...
-  if (userId && req.nextUrl.pathname === '/') {
-    if (sessionClaims?.roles === 'admin') {
-      return NextResponse.redirect(new URL('/admin', req.url));
-    } else {
-      return NextResponse.redirect(new URL('/catalogo', req.url));
-    }
-  }
-
-  // 2. Protección de rutas de Admin
+  // Protección de rutas de Admin
   if (isAdminRoute(req)) {
     if (sessionClaims?.roles !== 'admin') {
       return NextResponse.redirect(new URL('/', req.url));
     }
   }
 
-  // 3. Protección global para el resto de la app
+  // Protección global para el resto de la app
   if (!isPublicRoute(req)) {
     await auth.protect();
   }
@@ -33,9 +24,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
     '/(api|trpc)(.*)',
   ],
 };

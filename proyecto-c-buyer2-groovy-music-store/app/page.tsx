@@ -76,33 +76,36 @@ export default async function Home() {
                             <div className="flex flex-col sm:flex-row items-center gap-4 mb-16">
                                 
                                 {/* Iniciar sesión */}
-                                <Link 
-                                    href="/sign-in"
-                                    className="group flex items-center gap-3 px-8 py-3.5 bg-primary text-white rounded-full hover:opacity-90 transition-all hover:scale-105 shadow-lg shadow-primary/20"
-                                    style={{ letterSpacing: "0.08em" }}
-                                >
-                                    <UserIcon className="w-4 h-4" />
-                                    <span className="text-sm font-medium tracking-widest uppercase" style={{ letterSpacing: "0.12em" }}>
-                                        Iniciar sesión
-                                    </span>
-                                    <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                                </Link>
+                                <SignInButton forceRedirectUrl="/auth-sync">
+                                    <button 
+                                        className="group flex items-center gap-3 px-8 py-3.5 bg-primary text-white rounded-full hover:opacity-90 transition-all hover:scale-105 shadow-lg shadow-primary/20"
+                                        style={{ letterSpacing: "0.08em" }}
+                                    >
+                                        <UserIcon className="w-4 h-4" />
+                                        <span className="text-sm font-medium tracking-widest uppercase" style={{ letterSpacing: "0.12em" }}>
+                                            Iniciar sesión
+                                        </span>
+                                        <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                    </button>
+                                </SignInButton>
 
                                 {/* Registrarse */}
-                                <Link 
-                                    href="/sign-up"
-                                    className="group flex items-center gap-3 px-8 py-3.5 bg-transparent border border-white/30 text-white rounded-full hover:border-white/70 hover:bg-white/10 transition-all hover:scale-105 backdrop-blur-sm"
-                                    style={{ letterSpacing: "0.08em" }}
-                                >
-                                    <UserPlusIcon className="w-4 h-4" />
-                                    <span className="text-sm font-medium tracking-widest uppercase" style={{ letterSpacing: "0.12em" }}>
-                                        Registrarse
-                                    </span>
-                                    <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                                </Link>
+                                <SignUpButton forceRedirectUrl="/auth-sync">
+                                    <button 
+                                        className="group flex items-center gap-3 px-8 py-3.5 bg-transparent border border-white/30 text-white rounded-full hover:border-white/70 hover:bg-white/10 transition-all hover:scale-105 backdrop-blur-sm"
+                                        style={{ letterSpacing: "0.08em" }}
+                                    >
+                                        <UserPlusIcon className="w-4 h-4" />
+                                        <span className="text-sm font-medium tracking-widest uppercase" style={{ letterSpacing: "0.12em" }}>
+                                            Registrarse
+                                        </span>
+                                        <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                                    </button>
+                                </SignUpButton>
+
                             </div>
 
-                            {/* Continuar sin cuenta (MEJORADO) */}
+                            {/* Continuar sin cuenta */}
                             <Link 
                                 href="/catalogo" 
                                 className="group flex items-center gap-2 mt-auto px-6 py-3 bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/30 text-white/80 hover:text-white rounded-full transition-all backdrop-blur-sm"
@@ -115,7 +118,7 @@ export default async function Home() {
                         </>
                     ) : (
                         <>
-                            {/* ESTADO LOGUEADO: Ya no le pedimos registrarse */}
+                            {/* ESTADO LOGUEADO:  no le pedimos registrarse */}
                             <Link
                                 href="/catalogo"
                                 className="group flex items-center gap-3 px-10 py-4 bg-primary text-white rounded-full hover:opacity-90 transition-all hover:scale-105 shadow-lg shadow-primary/20 mt-4"

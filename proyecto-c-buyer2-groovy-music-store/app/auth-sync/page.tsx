@@ -1,12 +1,11 @@
 /**
- * PUENTE DE AUTENTICACIÓN: Registra al usuario de Clerk en Prisma para poder asociarle carritos/compras.
- * Al terminar, lo redirige inteligentemente al producto exacto donde interrumpió su compra (o al catálogo).
+  * PUENTE DE AUTENTICACIÓN: Registra al usuario de Clerk en Prisma para poder asociarle carritos/compras.
+  * Al terminar, lo redirige inteligentemente al producto exacto donde interrumpió su compra (o al catálogo).
  */
-
 import { currentUser } from "@clerk/nextjs/server"
 import { redirect } from "next/navigation"
 import prisma from "@/app/lib/prisma"
-
+import ForceRedirect from "@/app/ui/ForceRedirect" // <-- Importamos nuestro nuevo componente
 
 interface AuthSyncProps {
     searchParams: Promise<{ returnTo?: string }>;
@@ -34,10 +33,11 @@ export default async function AuthSyncPage({ searchParams }: AuthSyncProps) {
         }
     });
 
-    // 3. Leemos el destino final de manera segura desde la URL
     const resolvedSearchParams = await searchParams;
-    const destinoFinal = resolvedSearchParams.returnTo || '/catalogo';
+    const isAdmin = user.publicMetadata?.roles === 'admin';
+    const rutaPorDefecto = isAdmin ? '/admin' : '/catalogo';
+    
+    const destinoFinal = resolvedSearchParams.returnTo || rutaPorDefecto;
 
-    // 4. Redirección definitiva al producto exacto o al catálogo por defecto
-    redirect(destinoFinal);
+    return <ForceRedirect destino={destinoFinal} />;
 }

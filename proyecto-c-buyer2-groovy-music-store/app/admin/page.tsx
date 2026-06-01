@@ -2,9 +2,7 @@ import AdminNavBar from '@/app/ui/AdminNavBar'
 import Link from 'next/link'
 import prisma from "@/app/lib/prisma"
 
-export const metadata = {
-    title: 'Dashboard - Admin Groovy',
-}
+
 
 export default async function AdminDashboardPage() {
     // Consultas de métricas rápidas a la base de datos

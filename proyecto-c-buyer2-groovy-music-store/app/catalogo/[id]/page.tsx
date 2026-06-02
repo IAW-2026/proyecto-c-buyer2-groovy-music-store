@@ -1,19 +1,11 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
-
-// Componentes
 import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
 import BotonAgregarCarrito from '@/app/ui/BotonAgregarCarrito'
 import NavBar from '@/app/ui/NavBar'
-
-// Servicio externo
 import { getFullProduct } from '@/app/lib/services/seller-api'
-
-// Autenticación
 import { auth } from '@clerk/nextjs/server'
-
-// Conexión única de Prisma
 import prisma from '@/app/lib/prisma'
 
 export const metadata = {
@@ -57,22 +49,17 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             
             <NavBar />
 
-            {/* BARRA DE NAVEGACIÓN SECUNDARIA - Accesibilidad mejorada (white/80) */}
             <div className="flex items-center justify-between px-8 py-3 bg-foreground text-white/80 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
-                
-                {/* BOTÓN VOLVER: Ahora parece un botón real y accesible */}
                 <Link 
                     href="/catalogo" 
-                    className="group flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/30 hover:border-white/60 bg-transparent hover:bg-white/10 text-white transition-all duration-300"
+                    className="group flex items-center gap-2 px-5 py-1.5 rounded-full font-bold border-2 bg-[#B83A15] text-white border-[#9C2E0F] shadow-sm hover:bg-[#A33313] hover:scale-105 transition-all duration-300"
                     aria-label="Volver al catálogo"
                 >
                     <ArrowLeftIcon className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" aria-hidden="true" />
-                    <span className="font-bold">Volver al catálogo</span>
+                    <span>Volver al catálogo</span>
                 </Link>
-
             </div>
 
-            {/* CONTENIDO DEL PRODUCTO */}
             <div className="max-w-5xl mx-auto mt-10 px-6 md:px-12">
                 <div className="bg-card border border-border rounded-xl shadow-sm p-6 md:p-10 flex flex-col md:flex-row gap-10">
                     
@@ -95,10 +82,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                             ${(product.precio || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                         </div>
                         
-                        {/* CAJA DE DETALLES */}
                         <div className="flex flex-col gap-4 mb-8 bg-background p-6 rounded-lg border border-border font-dm">
                             <div className="flex justify-between border-b border-border pb-2">
-                                {/* Usamos text-foreground sólido en lugar de /80 */}
                                 <span className="text-foreground font-medium">Formato</span>
                                 <span className="font-bold text-foreground">{product.formato}</span>
                             </div>
@@ -112,7 +97,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                             </div>
                             <div className="flex justify-between">
                                 <span className="text-foreground font-medium">Disponibilidad</span>
-                                {/* Cambiamos text-green-700 por text-green-800 para mayor contraste */}
                                 <span className={`font-bold tracking-wide ${product.stock > 0 ? 'text-green-800' : 'text-[#B83A15]'}`}>
                                     {product.stock > 0 
                                         ? `${product.stock} ${product.stock === 1 ? 'unidad' : 'unidades'}` 

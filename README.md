@@ -7,10 +7,10 @@
 Para evaluar la plataforma y el panel de administración, puedes utilizar las siguientes credenciales (gestionadas vía Clerk):
 
 * **Usuario Administrador:**
-    * Email: `admin_buyer+clerktest@iaw.com` 
+    * Email: `admin_buyer+clerk_test@iaw.com` 
     * Contraseña: `iawuser#` 
 * **Usuario Comprador (Cliente):**
-    * Email: `buyer+clerktest@iaw.com` 
+    * Email: `buyer+clerk_test@iaw.com` 
     * Contraseña: `iawuser#` 
 
 ## Instrucciones de uso y evaluación

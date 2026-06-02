@@ -79,8 +79,7 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
         });
     };
 
-    // Estilos dinámicos adaptados al "Ver detalles" del catálogo
-    let botonColor = 'bg-primary border-primary-dark shadow-md text-shadow-contrast hover:bg-[#B83A15] hover:scale-[1.02] hover:shadow-lg';
+    let botonColor = 'bg-[#B83A15] border-[#9C2E0F] shadow-md text-shadow-contrast hover:bg-[#A33313] hover:scale-[1.02] hover:shadow-lg';
     let botonTexto = 'Agregar al carrito';
     let clasesExtra = ''; 
 
@@ -107,11 +106,9 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
     return (
         <>
             <div className="flex items-center gap-4 w-full">
-                {/* SELECTOR DE CANTIDAD */}
                 {!sinStockDisponible && !isPending && !fueAgregado && (
                     <div className="flex items-center border border-border rounded-lg bg-background h-[60px]">
                         
-                        {/* Botón Restar con aria-label */}
                         <button 
                             onClick={handleDecrementar} 
                             disabled={cantidad <= 1} 
@@ -121,12 +118,10 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
                             <MinusIcon className="w-4 h-4" aria-hidden="true" />
                         </button>
                         
-                        {/* Indicador de cantidad (aria-live para que el lector avise si cambia) */}
                         <span aria-live="polite" className="px-2 text-lg font-bold min-w-[40px] text-center text-foreground select-none font-syne">
                             {cantidad}
                         </span>
                         
-                        {/* Botón Sumar con aria-label */}
                         <button 
                             onClick={handleIncrementar} 
                             disabled={cantidad >= stockDisponible} 
@@ -139,7 +134,6 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
                     </div>
                 )}
                 
-                {/* BOTÓN PRINCIPAL */}
                 <button 
                     onClick={handleAgregar} 
                     disabled={sinStockDisponible || isPending || fueAgregado} 
@@ -150,7 +144,6 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
                 </button>
             </div>
 
-            {/* MODAL (Se mantiene igual) */}
             {showModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1a1008]/80 backdrop-blur-md transition-opacity">
                     <div className="bg-card border border-border rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl relative animate-in fade-in zoom-in duration-200">
@@ -161,7 +154,7 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
                         <div className="flex flex-col gap-3">
                             <Link 
                                 href={`/sign-in?returnTo=${encodeURIComponent(rutaConOrden)}`}
-                                className="w-full bg-primary border-2 border-primary-dark text-shadow-contrast shadow-sm text-white rounded-full py-3.5 text-[13px] font-bold tracking-[0.1em] uppercase hover:bg-[#B83A15] hover:scale-[1.02] transition-all flex justify-center items-center"
+                                className="w-full bg-[#B83A15] border-2 border-[#9C2E0F] text-shadow-contrast shadow-sm text-white rounded-full py-3.5 text-[13px] font-bold tracking-[0.1em] uppercase hover:bg-[#A33313] hover:scale-[1.02] transition-all flex justify-center items-center"
                             >
                                 Iniciar Sesión
                             </Link>

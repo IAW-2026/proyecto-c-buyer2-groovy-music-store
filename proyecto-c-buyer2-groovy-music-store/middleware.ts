@@ -17,7 +17,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     try {
       const token = authHeader.split(' ')[1];
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+      const secret = new TextEncoder().encode(process.env.BUYER_JWT_SECRET);
       await jwtVerify(token, secret);
       return NextResponse.next();
     } catch {

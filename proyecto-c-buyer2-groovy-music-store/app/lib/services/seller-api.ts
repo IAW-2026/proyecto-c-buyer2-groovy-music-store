@@ -6,12 +6,12 @@ import {
     mockProducts 
 } from '../placeholder-data';
 
+const SELLER_API_URL = process.env.NEXT_PUBLIC_SELLER_API_URL;
 
-/* Los returns de las funciones de abajo van a 
-cambiar cuando conecte la api de la seller app */
 
 // 1. Obtener catálogo de productos
-//MOCKEADO (BORRAR CUANDO INTEGRE LA API)
+//MOCKEADO
+// TODO:  (BORRAR CUANDO INTEGRE LA API)
 export async function getCatalog(params: {
     page?: number;
     limit?: number;
@@ -85,7 +85,7 @@ export async function getCatalog(params: {
 
 //     try {
             //url api
-//         const url = new URL(`${process.env.NEXT_PUBLIC_SELLER_API_URL }/api/products`);
+//         const url = new URL(`${SELLER_API_URL }/api/products`);
         
             //paginado
 //         url.searchParams.append('pagina', page.toString());
@@ -122,7 +122,8 @@ export async function getCatalog(params: {
 //         const response = await fetch(url.toString(), {
 //             method: 'GET',
 //             headers,
-//             // next: { revalidate: 30 } // Descomentá esto si querés usar caché de Next.js
+//             //  Guarda esta respuesta en cache por 60 segundos
+               // next: { revalidate: 300 }
 //         });
 
 //         if (!response.ok) {
@@ -171,6 +172,8 @@ export async function getCatalog(params: {
 //2. Obtener detalle de producto
 //GET /api/products/:id
 //para la vista de carrito y la pagina de checkout
+//MOCKEADO 
+//TODO: BORRAR CUANDO INTEGRE LA API
 export async function getProductQuickDetail(id: string): Promise<ProductSummary | null> {
     const producto = detallesProductosMock[id];
     if (!producto) {
@@ -179,11 +182,98 @@ export async function getProductQuickDetail(id: string): Promise<ProductSummary 
     return producto;
 }
 
+
+//PARA INTEGRAR CON LA API
+//TODO: DESCOMENTAR CUANDO INTEGRE LA API
+// export async function getProductQuickDetail(id: string): Promise<ProductSummary | null> {
+//     try {
+//         const url = `${SELLER_API_URL}/api/products/${id}`;
+        
+//         const response = await fetch(url, {
+//             method: 'GET',
+//             headers: { 'Content-Type': 'application/json' },
+//             next: { revalidate: 10 } // Cacheado por solo 10 segundos
+//         });
+
+//         if (!response.ok) return null;
+
+//         const data = await response.json();
+
+        
+//         const summary: ProductSummary = {
+//             id: data.id,
+//             titulo: data.título || data.titulo || 'Sin título',
+//             artista: data.artista || 'Artista Desconocido',
+//             precio: data.precio || 0,
+//             stock: data.stock || 0,
+//             seller_id: data.seller_id || { id: 'default_seller' },
+//             imagen_principal: data.imagenes?.[0] || '',
+//         };
+
+//         return summary;
+
+//     } catch (error) {
+//         console.error(`Error al obtener detalle rápido del producto ${id}:`, error);
+//         return null;
+//     }
+// }
+
 //2. Obtener detalle de producto
 // GET /api/products/:id
 //para  la pagina de detalle del producto
+//MOCKEADO
+//TODO : borrar cuando integre la api
 export async function getFullProduct(id: string): Promise<Product | null> {
     const product = mockProducts.find(p => p.id === id);
     return product || null;
 }
 
+//para integrar api
+// export async function getFullProduct(id: string): Promise<Product | null> {
+//     try {
+//         const url = `${SELLER_API_URL}/api/products/${id}`;
+        
+//         const response = await fetch(url, {
+//             method: 'GET',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             next: { revalidate: 10 } // Cacheado por solo 10 segundos
+//         });
+
+//         if (!response.ok) {
+//             if (response.status === 404) {
+//                 return null;
+//             }
+//             throw new Error(`Error HTTP de la Seller App: ${response.status}`);
+//         }
+
+//         const data = await response.json();
+
+//         // JSON a tipo Product
+//        const product: Product = {
+//             id: data.id,
+//             titulo: data.título || data.titulo || 'Sin título',
+//             descripcion: data.descripcion || '',
+//             precio: data.precio || 0,
+//             stock: data.stock || 0,
+//             formato: data.formato || 'OTRO',
+//             genero: data.genero || 'Desconocido',
+//             imagenes: data.imagenes || [],
+            
+//             // TODO: acomodar cuando la API de la seller esté actualizada 
+//             artista: data.artista || 'Artista Desconocido',
+//             seller_id: data.seller_id || { id: 'default_seller' },
+//             condicion: data.condicion || 'No especificada',
+//         };
+
+//         return product;
+
+//     } catch (error) {
+//         console.error(`Error de red al obtener el producto con ID ${id}:`, error);
+        
+//         // Si el servidor está caído o hay un problema de conexión, 
+//         // devolvemos null 
+//         return null; 
+//     }
+// }

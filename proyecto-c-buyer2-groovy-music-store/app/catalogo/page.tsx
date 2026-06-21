@@ -26,7 +26,7 @@ export default async function CatalogPage({
     // Pasamos el formato correcto a la API
     const { data: products, meta } = await getCatalog({ 
         page: currentPage, 
-        limit: 12, 
+        limit: 4, 
         query,
         formato: currentFormato !== "TODO" ? currentFormato : undefined
     });
@@ -59,7 +59,6 @@ export default async function CatalogPage({
                                 aria-label={`Filtrar por ${cat}`}
                                 className={`px-4 py-1.5 rounded-full font-bold border-2 transition-all duration-300 ${
                                     isActive 
-                                        // 1. CORRECCIÓN BOTÓN ACTIVO: Terracota oscuro
                                         ? "bg-[#B83A15] text-white border-[#9C2E0F] shadow-sm text-shadow-contrast"
                                         : "bg-transparent text-white/90 border-transparent hover:text-white hover:border-white/30"
                                 }`}

@@ -277,3 +277,12 @@ export async function getFullProduct(id: string): Promise<Product | null> {
 //         return null; 
 //     }
 // }
+
+
+// TODO: Reemplazar con la llamada real a la Seller App cuando esté lista
+export async function getSellerPostalCode(sellerId: string): Promise<string> {
+  
+  await new Promise(resolve => setTimeout(resolve, 400));
+  
+  return "1000"; 
+}

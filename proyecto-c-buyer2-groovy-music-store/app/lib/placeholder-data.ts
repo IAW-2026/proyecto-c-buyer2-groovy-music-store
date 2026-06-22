@@ -166,9 +166,9 @@ export const simularCalculoEnvio = (
   destino_cp: string, 
   peso: number
 ): ShippingEstimate => {
-  return {
-    costo: 5500, 
-    fechaEntregaEstimada: 3
+ return {
+  costo: 5500, 
+  fechaEntregaEstimada: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() // Genera la fecha de dentro de 3 días en ISO 8601
   };
 };
 

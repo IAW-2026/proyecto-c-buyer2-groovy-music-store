@@ -1,18 +1,35 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { ItemCheckout } from '@/app/lib/definitions'; // Asegurate de que la ruta sea la correcta
+import { ItemCheckout } from '@/app/lib/definitions'; 
 
 interface TicketResumenProps {
     subtotal: number;
     envio: {
         costo: number;
-        fechaEntregaEstimada: number; 
+        fechaEntregaEstimada: string | null; 
     };
     total: number;
     sellerId: string;
     clerkId: string;
-    items: (ItemCheckout | null)[]; // Reemplazamos el any[] por nuestro tipo estricto
+    items: (ItemCheckout | null)[]; 
+    cargandoEnvio: boolean;         
+    errorEnvio: string | null;      
+}
+
+
+function formatearFechaEstimada(fechaIso: string | null): string {
+    if (!fechaIso) return ''; 
+    try {
+        const fecha = new Date(fechaIso);
+        return fecha.toLocaleDateString('es-AR', { 
+            day: 'numeric', 
+            month: 'long' 
+        });
+    } catch (error) {
+        console.error("Error al formatear la fecha:", error);
+        return fechaIso; 
+    }
 }
 
 export default function TicketResumen({
@@ -21,9 +38,10 @@ export default function TicketResumen({
     total,
     sellerId,
     clerkId,
-    items
+    items,
+    cargandoEnvio,
+    errorEnvio
 }: TicketResumenProps) {
-    // Extraemos el estado 'pending' que nos dice si el formulario se está enviando
     const { pending } = useFormStatus();
 
     return (
@@ -33,20 +51,35 @@ export default function TicketResumen({
                 
                 <div className="flex justify-between items-center mb-3 text-foreground/80">
                     <span>Subtotal (productos)</span>
-                    <span className="font-medium">${(subtotal|| 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })} </span>
+                    <span className="font-medium">${(subtotal || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })} </span>
                 </div>
                 
                 <div className="flex justify-between items-center mb-6 text-foreground/80">
-                    <span>Envío ({envio.fechaEntregaEstimada} días aprox.)</span>
-                    <span className="font-medium">${(envio.costo || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}</span>
+                    {/* CAMBIADO: Ahora muestra "Llega el 25 de junio" en vez de los días aprox. */}
+                    <span>
+                        Envío {cargandoEnvio ? '' : errorEnvio ? '' : `(Llega el ${formatearFechaEstimada(envio.fechaEntregaEstimada)})`}
+                    </span>
+                    
+                    {cargandoEnvio ? (
+                        <span className="text-primary animate-pulse text-sm font-medium">Cargando envío...</span>
+                    ) : errorEnvio ? (
+                        <span className="text-red-500 text-xs">{errorEnvio}</span>
+                    ) : (
+                        <span className="font-medium">${(envio.costo || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}</span>
+                    )}
                 </div>
 
                 <div className="flex justify-between items-center border-t border-border pt-5 mb-8">
                     <span className="font-syne font-bold text-lg">Total</span>
-                    <span className="font-syne font-bold text-3xl text-primary">${(total|| 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}</span>
+                    <span className="font-syne font-bold text-3xl text-primary">
+                        {cargandoEnvio ? (
+                           <span className="text-lg text-foreground/50 font-normal">Calculando...</span>
+                        ) : (
+                           `$${(total || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}`
+                        )}
+                    </span>
                 </div>
 
-                {/* Inputs ocultos que van a viajar en el FormData al confirmar */}
                 <input type="hidden" name="sellerId" value={sellerId} />
                 <input type="hidden" name="clerkId" value={clerkId} />
                 <input type="hidden" name="total" value={total.toString()} />
@@ -55,7 +88,7 @@ export default function TicketResumen({
                 
                 <button 
                     type="submit" 
-                    disabled={pending}
+                    disabled={pending || cargandoEnvio || !!errorEnvio}
                     className="w-full bg-primary text-background font-dm font-semibold py-3.5 px-4 rounded-lg hover:opacity-90 transition-all disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                     {pending ? (

@@ -61,7 +61,7 @@ export type CatalogResponse = {
 //  SHIPPING APP 
 export type ShippingEstimate = {
   costo: number;
-  fechaEntregaEstimada: number;
+  fechaEntregaEstimada: string;
 };
 
 export type EstadoEnvio = 'pendiente' | 'en_transito' | 'entregado' | 'cancelado';

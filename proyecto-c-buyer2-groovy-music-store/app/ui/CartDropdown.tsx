@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { ShoppingCartIcon, TrashIcon, PlusIcon, MinusIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
+import { ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { useRouter } from 'next/navigation';
 
 import { actualizarCantidadItemBD, eliminarItemBD } from '@/app/lib/actions/actions-cart';
 import type { HydratedCartItem } from '@/app/lib/definitions';
+import { CartSellerGroup } from './CartSellerGroup'; // Ajustá el import 
 
 interface CartDropdownProps {
     items: HydratedCartItem[];
@@ -15,50 +15,50 @@ interface CartDropdownProps {
 export default function CartDropdown({ items }: CartDropdownProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [cartItems, setCartItems] = useState<HydratedCartItem[]>(items);
-    
     const [mostrarAviso, setMostrarAviso] = useState(true);
+    const router = useRouter();
 
-    useEffect(() => {
-        setCartItems(items);
-    }, [items]);
+    useEffect(() => setCartItems(items), [items]);
 
     const handleUpdateQuantity = async (id_carrito: string, producto_id: string, delta: number) => {
         const item = cartItems.find(i => i.producto_id === producto_id);
         if (!item) return;
 
-        const stockMaximo = item.producto.stock; 
-        let nuevaCantidad = item.cantidad + delta;
-
-        if (nuevaCantidad < 1) nuevaCantidad = 1;
-        if (nuevaCantidad > stockMaximo) nuevaCantidad = stockMaximo;
-
+        let nuevaCantidad = Math.max(1, Math.min(item.cantidad + delta, item.producto.stock));
         if (nuevaCantidad === item.cantidad) return; 
 
-        setCartItems(prev => prev.map(i => 
-            i.producto_id === producto_id ? { ...i, cantidad: nuevaCantidad } : i
-        ));
+        setCartItems(prev => prev.map(i => i.producto_id === producto_id ? { ...i, cantidad: nuevaCantidad } : i));
 
         const result = await actualizarCantidadItemBD(id_carrito, producto_id, nuevaCantidad);
-        
         if (!result.success) {
-            console.error(result.error);
-            setCartItems(prev => prev.map(i => 
-                i.producto_id === producto_id ? { ...i, cantidad: item.cantidad } : i
-            ));
+            setCartItems(prev => prev.map(i => i.producto_id === producto_id ? { ...i, cantidad: item.cantidad } : i));
         }
     };
 
     const handleRemoveItem = async (id_carrito: string, producto_id: string) => {
         const itemAEliminar = cartItems.find(i => i.producto_id === producto_id);
-        
         setCartItems(prev => prev.filter(i => i.producto_id !== producto_id));
 
         const result = await eliminarItemBD(id_carrito, producto_id);
-        
         if (!result.success && itemAEliminar) {
-            console.error(result.error);
             setCartItems(prev => [...prev, itemAEliminar]);
         }
+    };
+
+    const handleCheckout = async (vendedorId: string, itemsDelVendedor: HydratedCartItem[]) => {
+        const itemsSinStock = itemsDelVendedor.filter(item => item.producto.stock <= 0);
+        const itemsConStock = itemsDelVendedor.filter(item => item.producto.stock > 0);
+
+        if (itemsSinStock.length > 0) {
+            const idsAEliminar = itemsSinStock.map(i => i.producto_id);
+            setCartItems(prev => prev.filter(i => !idsAEliminar.includes(i.producto_id)));
+            await Promise.all(itemsSinStock.map(item => eliminarItemBD(item.id_carrito, item.producto_id)));
+        }
+
+        if (itemsConStock.length === 0) return; 
+
+        setIsOpen(false);
+        router.push(`/checkout?seller=${encodeURIComponent(vendedorId)}`);
     };
 
     const groupedCart = cartItems.reduce((acc, item) => {
@@ -72,14 +72,11 @@ export default function CartDropdown({ items }: CartDropdownProps) {
 
     return (
         <div className="relative font-dm">
-            {/* BOTÓN EXPANDIBLE */}
             <button 
                 onClick={() => setIsOpen(!isOpen)}
-                className="group flex items-center p-2 bg-transparent hover:bg-white/15 active:bg-white/20 rounded-full transition-all duration-300 ease-in-out cursor-pointer border-none text-white"
-                title="Carrito"
+                className="group flex items-center p-2 bg-transparent hover:bg-white/15 active:bg-white/20 rounded-full transition-all duration-300 ease-in-out border-none text-white cursor-pointer"
             >
-                {/* Contenedor relativo para anclar la burbuja al ícono */}
-                <div className="relative flex items-center justify-center text-white/90 group-hover:text-white transition-colors">
+                <div className="relative flex items-center justify-center text-white/90 group-hover:text-white">
                     <ShoppingCartIcon className="w-5 h-5" />
                     {totalItems > 0 && (
                         <span className="absolute -top-1.5 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#2E2E2E] text-[10px] font-bold text-white border border-primary/50">
@@ -87,31 +84,21 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                         </span>
                     )}
                 </div>
-
-                {/* Texto expansivo (oculto en móvil, visible en md) */}
                 <span className="hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[80px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase">
                     Carrito
                 </span>
             </button>
 
-            {/* DROPDOWN */}
             {isOpen && (
                 <div className="absolute right-0 mt-4 w-[300px] sm:w-[360px] bg-card border border-border rounded-xl shadow-lg z-50 flex flex-col max-h-[70vh]">
                     <div className="p-4 border-b border-border bg-black/5 rounded-t-xl shrink-0">
-                        <h3 className="m-0 text-base font-semibold text-foreground font-syne">
-                            Productos en tu carrito
-                        </h3>
+                        <h3 className="m-0 text-base font-semibold text-foreground font-syne">Productos en tu carrito</h3>
                     </div>
 
                     <div className="overflow-y-auto p-4 flex flex-col gap-5 relative">
-                        
                         {mostrarAviso && cartItems.length > 0 && Object.keys(groupedCart).length > 1 && (
-                            <div className="relative bg-[#f8f9fa] border border-border rounded-lg p-3 pr-8 text-[12px] text-foreground/80 font-dm leading-snug shadow-sm">
-                                <button 
-                                    onClick={() => setMostrarAviso(false)}
-                                    className="absolute top-2 right-2 text-foreground/40 hover:text-foreground transition-colors p-1"
-                                    title="Cerrar aviso"
-                                >
+                            <div className="relative bg-[#f8f9fa] border border-border rounded-lg p-3 pr-8 text-[12px] text-foreground/80 font-dm shadow-sm">
+                                <button onClick={() => setMostrarAviso(false)} className="absolute top-2 right-2 text-foreground/40 hover:text-foreground p-1">
                                     <XMarkIcon className="w-4 h-4" />
                                 </button>
                                 <strong>Nota:</strong> Los productos están agrupados porque pertenecen a distintos vendedores. Deberás iniciar la compra de cada grupo por separado.
@@ -121,99 +108,16 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                         {cartItems.length === 0 ? (
                             <p className="text-center text-foreground/60 my-4 text-sm">Tu carrito está vacío</p>
                         ) : (
-                            Object.entries(groupedCart).map(([vendedorId, itemsDelVendedor]) => {
-                                const idSellerReal = itemsDelVendedor[0].producto.seller_id.id;
-                                const subtotal = itemsDelVendedor.reduce((acc, item) => acc + (item.producto.precio * item.cantidad), 0);
-
-                                return (
-                                    <div key={vendedorId} className="border border-border rounded-lg p-3 bg-white shadow-sm">
-                                        
-                                        <ul className="list-none p-0 m-0 mb-3 flex flex-col gap-4">
-                                            {itemsDelVendedor.map((item) => {
-                                                const reachedMax = item.cantidad >= item.producto.stock;
-
-                                                return (
-                                                    <li key={item.producto_id} className="flex gap-3 items-center border-b border-border pb-3 last:border-0 last:pb-0">
-                                                        <div className="w-12 h-12 relative bg-gray-200 rounded shrink-0 overflow-hidden">
-                                                            <Image 
-                                                                src={item.producto.imagen_principal || '/placeholder-record.png'} 
-                                                                alt={item.producto.titulo} 
-                                                                fill 
-                                                                className="object-cover"
-                                                            />
-                                                        </div>
-                                                        
-                                                        <div className="grow min-w-0">
-                                                            <p className="m-0 text-[13px] font-medium text-foreground truncate font-syne">
-                                                                {item.producto.titulo}
-                                                            </p>
-                                                        </div>
-                                                        
-                                                        <div className="flex flex-col items-end gap-1.5 shrink-0">
-                                                            <div className="text-[13px] font-semibold text-foreground font-syne">
-                                                                ${(item.producto.precio * item.cantidad || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
-                                                            </div>
-                                                            
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="w-fit flex items-center border border-border rounded-md">
-                                                                    <button 
-                                                                        onClick={() => handleUpdateQuantity(item.id_carrito, item.producto_id, -1)}
-                                                                        disabled={item.cantidad <= 1}
-                                                                        className="p-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:text-gray-900 transition-colors"
-                                                                    >
-                                                                        <MinusIcon className="w-3 h-3" />
-                                                                    </button>
-                                                                    <span className="px-2 text-[11px] font-medium min-w-[20px] text-center text-gray-900">
-                                                                        {item.cantidad}
-                                                                    </span>
-                                                                    <button 
-                                                                        onClick={() => handleUpdateQuantity(item.id_carrito, item.producto_id, 1)}
-                                                                        disabled={reachedMax}
-                                                                        className="p-1 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed text-gray-600 hover:text-gray-900 transition-colors"
-                                                                        title={reachedMax ? "Stock máximo alcanzado" : ""}
-                                                                    >
-                                                                        <PlusIcon className="w-3 h-3" />
-                                                                    </button>
-                                                                </div>
-                                                                
-                                                                <button 
-                                                                    onClick={() => handleRemoveItem(item.id_carrito, item.producto_id)}
-                                                                    className="text-gray-400 hover:text-red-500 transition-colors"
-                                                                    title="Eliminar producto"
-                                                                >
-                                                                    <TrashIcon className="w-4 h-4" />
-                                                                </button>
-                                                            </div>
-                                                            
-                                                            {reachedMax && item.producto.stock > 0 && (
-                                                                <span className="text-[10px] text-orange-500 block text-right">
-                                                                    Solo {item.producto.stock === 1 ? 'queda' : 'quedan'} {item.producto.stock} {item.producto.stock === 1 ? 'unidad' : 'unidades'}
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-
-                                        <div className="border-t border-border pt-3 flex flex-col gap-2">
-                                            <div className="flex justify-between items-center">
-                                                <span className="text-xs text-foreground/60 font-dm">Subtotal:</span>
-                                                <span className="text-sm font-semibold text-foreground font-syne">
-                                                    ${(subtotal || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
-                                                </span>
-                                            </div>
-                                            <Link 
-                                                href={`/checkout?seller=${encodeURIComponent(idSellerReal)}`}
-                                                className="block text-center w-full bg-foreground text-background border-none rounded-md py-2 text-[13px] font-medium cursor-pointer hover:opacity-90 transition-opacity font-dm"
-                                                onClick={() => setIsOpen(false)}
-                                            >
-                                                Iniciar compra
-                                            </Link>
-                                        </div>
-                                    </div>
-                                );
-                            })
+                            Object.entries(groupedCart).map(([vendedorId, itemsDelVendedor]) => (
+                                <CartSellerGroup 
+                                    key={vendedorId}
+                                    vendedorId={vendedorId}
+                                    items={itemsDelVendedor}
+                                    onUpdateQuantity={handleUpdateQuantity}
+                                    onRemoveItem={handleRemoveItem}
+                                    onCheckout={handleCheckout}
+                                />
+                            ))
                         )}
                     </div>
                 </div>

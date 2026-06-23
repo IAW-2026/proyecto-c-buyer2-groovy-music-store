@@ -182,6 +182,55 @@ export async function getFullProduct(id: string): Promise<Product | null> {
     }
 }
 
+// 3. Obtener un lote de productos 
+export async function getProductsBatch(ids: string[]): Promise<ProductSummary[]> {
+    
+    if (!ids || ids.length === 0) {
+        return [];
+    }
+
+    try {
+        const url = `${SELLER_API_URL}/api/products/batch`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ ids }),
+            
+            next: { revalidate: 10 } 
+        });
+
+        if (!response.ok) {
+            if (response.status === 400) {
+                console.warn("Error 400: Se requiere un array de IDs válido");
+                return [];
+            }
+            throw new Error(`Error HTTP de la Seller App: ${response.status}`);
+        }
+
+        const jsonResponse = await response.json();
+        const productos = jsonResponse.datos || [];
+
+        
+        return productos.map((data: any): ProductSummary => ({
+            id: data.id,
+            titulo: data.título || data.titulo || 'Sin título', 
+            artista: data.artista || 'Artista Desconocido',
+            precio: data.precio || 0,
+            stock: data.stock || 0,
+            seller_id: data.seller_id || { id: 'default_seller' },
+            imagen_principal: data.imagenes?.[0] || '/placeholder-record.png',
+        }));
+
+    } catch (error) {
+        console.error(`Error al obtener el batch de productos:`, error);
+       
+        return [];
+    }
+}
+
 
 // TODO: Reemplazar con la llamada real a la Seller App cuando esté lista
 export async function getSellerPostalCode(sellerId: string, token: string): Promise<string> {

@@ -11,10 +11,16 @@ interface BotonProps {
     productoId: string;
     stockTotal: number;
     stockDisponible: number;
+    setStockDisponible: (valor: number | ((prev: number) => number)) => void; 
     sellerId: string;
 }
 
-export default function BotonAgregarCarrito({ productoId, stockTotal, stockDisponible, sellerId }: BotonProps) {
+export default function BotonAgregarCarrito({ 
+    productoId, 
+    stockTotal, 
+    stockDisponible, 
+    sellerId 
+}: BotonProps) {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -39,6 +45,9 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
                 
                 if (resultado?.success) {
                     setFueAgregado(true);
+                    // Actualizamos el stock en el componente padre restando la cantidad guardada
+                    setStockDisponible(prev => prev - cantidadGuardada);
+                    
                     setTimeout(() => {
                         setFueAgregado(false);
                     }, 2000);
@@ -47,7 +56,7 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
 
             router.replace(pathname, { scroll: false });
         }
-    }, [isLoaded, isSignedIn, searchParams, pathname, router, productoId, sellerId]);
+    }, [isLoaded, isSignedIn, searchParams, pathname, router, productoId, sellerId, setStockDisponible]);
 
     const sinStockDisponible = stockDisponible <= 0;
 
@@ -71,7 +80,10 @@ export default function BotonAgregarCarrito({ productoId, stockTotal, stockDispo
             const resultado = await agregarAlCarrito(productoId, sellerId, cantidad);
             if (resultado?.success) {
                 setFueAgregado(true);
+                // Actualizamos el stock en el componente padre restando la cantidad seleccionada
+                setStockDisponible(prev => prev - cantidad);
                 setCantidad(1); 
+                
                 setTimeout(() => {
                     setFueAgregado(false);
                 }, 2000);

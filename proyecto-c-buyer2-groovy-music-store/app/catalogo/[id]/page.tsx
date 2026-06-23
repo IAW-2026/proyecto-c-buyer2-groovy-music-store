@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
-import BotonAgregarCarrito from '@/app/ui/BotonAgregarCarrito'
 import NavBar from '@/app/ui/NavBar'
+import SeccionCompra from '@/app/ui/SeccionCompra'
 import { getFullProduct } from '@/app/lib/services/seller-api'
 import { auth } from '@clerk/nextjs/server'
 import prisma from '@/app/lib/prisma'
@@ -28,9 +28,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
             const itemExistente = await prisma.itemCarrito.findFirst({
                 where: {
                     producto_id: product.id,
-                    carrito: {
-                        clerk_id: userId
-                    }
+                    carrito: { clerk_id: userId }
                 }
             });
 
@@ -46,7 +44,6 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
     return (
         <main className="min-h-screen bg-background font-dm pb-20">
-            
             <NavBar />
 
             <div className="flex items-center justify-between px-8 py-3 bg-foreground text-white/80 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
@@ -82,37 +79,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                             ${(product.precio || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                         </div>
                         
-                        <div className="flex flex-col gap-4 mb-8 bg-background p-6 rounded-lg border border-border font-dm">
-                            <div className="flex justify-between border-b border-border pb-2">
-                                <span className="text-foreground font-medium">Formato</span>
-                                <span className="font-bold text-foreground">{product.formato}</span>
-                            </div>
-                            <div className="flex justify-between border-b border-border pb-2">
-                                <span className="text-foreground font-medium">Condición</span>
-                                <span className="font-bold text-foreground">{product.condicion}</span>
-                            </div>
-                            <div className="flex justify-between border-b border-border pb-2">
-                                <span className="text-foreground font-medium">Género</span>
-                                <span className="font-bold text-foreground">{product.genero}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span className="text-foreground font-medium">Disponibilidad</span>
-                                <span className={`font-bold tracking-wide ${product.stock > 0 ? 'text-green-800' : 'text-[#B83A15]'}`}>
-                                    {product.stock > 0 
-                                        ? `${product.stock} ${product.stock === 1 ? 'unidad' : 'unidades'}` 
-                                        : 'Agotado'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div className="mt-auto">
-                            <BotonAgregarCarrito 
-                                productoId={product.id} 
-                                stockTotal={product.stock} 
-                                stockDisponible={stockDisponible}
-                                sellerId={product.seller_id.id}
-                            />
-                        </div>
+                        <SeccionCompra product={product} stockDisponibleInicial={stockDisponible} />
                     </div>
                 </div>
             </div>

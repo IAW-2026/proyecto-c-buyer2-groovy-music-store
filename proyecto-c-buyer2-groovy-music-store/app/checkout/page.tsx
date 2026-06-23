@@ -32,10 +32,18 @@ function calcularPesoTotal(items: any[]): number {
 export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ seller?: string }>; }) {
     const params = await searchParams;            
     const sellerId = params.seller;
-    const { userId: clerkId } = await auth(); 
+    const { userId: clerkId, getToken } = await auth(); 
 
     if (!sellerId || !clerkId) {
         redirect('/');
+    }
+
+   
+    const token = await getToken();
+
+    
+    if (!token) {
+        throw new Error("No se pudo obtener el token de autenticación");
     }
 
     const [itemsDb, direccionesDb] = await Promise.all([
@@ -53,6 +61,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
 
     const itemsBorrador = await Promise.all(
         itemsDb.map(async (item) => {
+            
             const detalle = await getProductQuickDetail(item.producto_id);
             return detalle ? { cantidad: item.cantidad, ...detalle } : null;
         })
@@ -66,14 +75,9 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
         throw new Error("El usuario no tiene direcciones cargadas para el envío.");
     }
 
-    // Obtenemos el CP del Vendedor (Origen) en el servidor
-    const origen_cp = await getSellerPostalCode(sellerId);
+    // Obtenemos el CP del Vendedor 
+    const origen_cp = await getSellerPostalCode(sellerId,token);
 
-    //TODO: DESCOMENTAR CUANDO INTEGRE LA API
-    //const tokenDelUsuario = (await cookies()).get('auth_token')?.value; 
-
-    //TODO: borrar cuando integre la api
-    const tokenDelUsuario = '1'; 
 
     return (
         <main className="min-h-screen bg-background font-dm pb-20">
@@ -103,7 +107,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
                     subtotal={subtotal}
                     pesoTotal={pesoTotal}
                     origen_cp={origen_cp}
-                    tokenDelUsuario={tokenDelUsuario}
+                    tokenDelUsuario={token}
                 />
             </div>
         </main>

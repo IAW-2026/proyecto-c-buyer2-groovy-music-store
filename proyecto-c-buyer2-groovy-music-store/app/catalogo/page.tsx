@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link' 
 import NavBar from '@/app/ui/NavBar'
 import Pagination from '@/app/ui/Pagination'
-import { currentUser } from "@clerk/nextjs/server"
+import { currentUser } from "@clerk/nextjs/server" 
 import { getCatalog } from '@/app/lib/services/seller-api'
 
 export const metadata = {
@@ -16,17 +16,18 @@ export default async function CatalogPage({
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     
+
     const params = await searchParams;
     const currentPage = Number(params?.page) || 1;
     const query = typeof params?.q === 'string' ? params.q : "";
     
-    // Capturamos el formato actual de la URL (por defecto "TODO")
+    
     const currentFormato = typeof params?.formato === 'string' ? params.formato : "TODO";
 
-    // Pasamos el formato correcto a la API
+   
     const { data: products, meta } = await getCatalog({ 
         page: currentPage, 
-        limit: 4, 
+        limit: 12, 
         query,
         formato: currentFormato !== "TODO" ? currentFormato : undefined
     });

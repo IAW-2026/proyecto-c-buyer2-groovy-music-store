@@ -3,7 +3,7 @@ import Link from 'next/link'
 import prisma from "@/app/lib/prisma"
 import { actualizarOrden } from '@/app/lib/actions/actions-admin'
 import { getProductQuickDetail } from '@/app/lib/services/seller-api'
-import FormularioActualizarOrden from '@/app/ui/FormularioActualizarOrden';
+import FormularioActualizarOrden from '@/app/ui/FormularioActualizarOrden'
 
 export const metadata = { title: 'Órdenes - Admin Groovy' }
 
@@ -30,7 +30,7 @@ export default async function AdminOrdenesPage({ searchParams }: { searchParams:
         include: { 
             buyer: true, 
             items: true,
-            direccion: true // Traemos la ubicación de entrega de la orden
+            direccion: true 
         } 
     });
 

@@ -10,9 +10,10 @@ import TicketResumen from './TicketResumen';
 type CheckoutFormState = {
     success: boolean;
     message: string;
-    errors: {
+    errors?: {
         id_direccion?: string[];
         sellerId?: string[];
+        clerkId?: string[];
         total?: string[];
         items?: string[];
     };
@@ -32,17 +33,19 @@ export default function FormularioCheckout({
     const initialState: CheckoutFormState = { 
         success: false, 
         message: "", 
-        errors: {} 
+        errors: undefined 
     };
 
-    const [state, formAction] = useActionState(procesarCheckout, initialState);
-
     
+    const [formState, formAction] = useActionState(procesarCheckout as any, initialState);
+    
+   
+    const state = formState as CheckoutFormState;
+
     const [cpDestino, setCpDestino] = useState<string | null>(
         direccionesDb.length > 0 ? direccionesDb[0].cod_postal : null
     );
 
-    // 1. Tipamos explícitamente el estado para que acepte string o null
     const [envioDinamico, setEnvioDinamico] = useState<{
         costo: number;
         fechaEntregaEstimada: string | null;
@@ -54,7 +57,6 @@ export default function FormularioCheckout({
     const [cargandoEnvio, setCargandoEnvio] = useState<boolean>(false); 
     const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
 
-    // Efecto que reacciona SOLO al cambio del código postal
     useEffect(() => {
         const calcularEnvio = async () => {
             if (!cpDestino) {
@@ -79,7 +81,6 @@ export default function FormularioCheckout({
             } catch (error) {
                 console.error("Error calculando envío:", error);
                 setErrorEnvio("No se pudo calcular el envío");
-                // 2. CORREGIDO: Cambiado de 0 a null para mantener la consistencia del tipo
                 setEnvioDinamico({ costo: 0, fechaEntregaEstimada: null }); 
             } finally {
                 setCargandoEnvio(false);
@@ -98,8 +99,6 @@ export default function FormularioCheckout({
             <input type="hidden" name="total" value={totalDinamico.toString()} />
             <input type="hidden" name="items" value={JSON.stringify(itemsParaCheckout)} />
             
-
-
             <div className="lg:col-span-2 space-y-8">
                 {state?.message && !state?.success && (
                     <div className="p-4 text-sm text-red-800 bg-red-100 rounded-lg border border-red-200">
@@ -113,7 +112,6 @@ export default function FormularioCheckout({
                 </div>
 
                 <div>
-                    {/* Le pasamos el callback al Selector */}
                     <SelectorDireccion 
                         direcciones={direccionesDb} 
                         clerkId={clerkId} 

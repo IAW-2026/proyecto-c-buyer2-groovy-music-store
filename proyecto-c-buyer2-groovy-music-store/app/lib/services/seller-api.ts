@@ -1,11 +1,8 @@
 
-import { ProductSummary, Product, CatalogResponse } from '../definitions';
+import { ProductSummary, Product, CatalogResponse, SellerInfoResponse, SellerSummary } from '../definitions';
 import { ReservePayload, ReserveResponse } from '../definitions';
-import { 
-    mockProductSummaries, 
-    detallesProductosMock, 
-    mockProducts 
-} from '../placeholder-data';
+
+import { SignJWT } from 'jose';
 
 const SELLER_API_URL = process.env.NEXT_PUBLIC_SELLER_API_URL;
 
@@ -231,113 +228,123 @@ export async function getProductsBatch(ids: string[]): Promise<ProductSummary[]>
     }
 }
 
+// 2. Obtener información resumida del vendedor
+export async function getSellerInfo(sellerId: string): Promise<SellerSummary | null> {
+    if (!sellerId) return null;
 
-// TODO: Reemplazar con la llamada real a la Seller App cuando esté lista
-export async function getSellerPostalCode(sellerId: string, token: string): Promise<string> {
-  // Simulamos un pequeño retraso de red (400ms)
-  await new Promise(resolve => setTimeout(resolve, 400));
-  
-  // Retornamos el código postal mockeado
-  return "1000"; 
+    try {
+        const secretString = process.env.SELLER_JWT_SECRET;
+
+        if (!secretString) {
+            console.error("Falta SELLER_JWT_SECRET en el archivo .env.local");
+            return null; 
+        }
+
+        
+        const secret = new TextEncoder().encode(secretString);
+        const token = await new SignJWT({ origen: 'buyer_app' }) 
+            .setProtectedHeader({ alg: 'HS256' }) 
+            .setIssuedAt()
+            .setExpirationTime('5m') 
+            .sign(secret);
+
+        
+        const url = new URL(`${SELLER_API_URL}/api/sellers/${sellerId}`);
+
+        const response = await fetch(url.toString(), {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            },
+            next: { revalidate: 3600 } 
+            
+        });
+
+        if (response.status === 404) {
+            console.warn(`Vendedor no encontrado (ID: ${sellerId})`);
+            return null;
+        }
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP de la Seller App al buscar vendedor: ${response.status}`);
+        }
+
+        const jsonResponse: SellerInfoResponse = await response.json();
+
+        return {
+            nombre_fantasia: jsonResponse.datos.nombre_fantasia,
+            codigo_postal: jsonResponse.datos.codigo_postal,
+        };
+
+    } catch (error) {
+        console.error(`Error al obtener la información del seller (${sellerId}):`, error);
+        return null;
+    }
 }
 
-//TODO: DESCOMENTAR CUANDO ESTE LISTA LA API
-// export async function getSellerPostalCode(sellerId: string, token: string): Promise<string> {
-  
-
-//   try {
-//     const response = await fetch(`${SELLER_API_URL}/api/sellers/${sellerId}`, {
-//       method: 'GET',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${token}`
-//       },
-//     });
-
-//     if (!response.ok) {
-//       const errorData = await response.json().catch(() => ({})); 
-//       throw new Error(errorData.mensaje || `HTTP error! status: ${response.status}`);
-//     }
-
-//     const json = await response.json();
-    
-//     return json.datos.codigo_postal;
-
-//   } catch (error) {
-//     console.error("Error al obtener el código postal del seller:", error);
-//     throw error; 
-//   }
-// }
 
 
+export async function reservarStock(payload: ReservePayload): Promise<ReserveResponse> {
+  const secretKey = process.env.SELLER_JWT_SECRET;
 
-//MOCKEADO 
-//TODO: BORRAR CUANDO SE INTEGRE LA API
-export const reservarStock = async (
-  payload: ReservePayload,
-  token: string
-): Promise<ReserveResponse> => {
-  
- 
-  await new Promise(resolve => setTimeout(resolve, 600));
-
- 
-  if (!token) {
-    throw new Error("unauthorized: No se proporcionó un token de acceso válido");
+  if (!secretKey ) {
+    throw new Error("Faltan variables de entorno (SELLER_JWT_SECRET o SELLER_API_URL)");
   }
 
+ 
+  const secret = new TextEncoder().encode(secretKey);
+  const token = await new SignJWT({ 
+    seller_id: payload.seller_id 
+  })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("5m")
+    .sign(secret);
+
   
-  const itemsRespondidos = payload.items.map((item) => {
-    // Buscamos el producto en el  listado de mockProducts
-    const productoExistente = mockProducts.find(p => p.id === item.producto_id);
-
-    // Validación: Producto no encontrado (Error 404)
-    if (!productoExistente) {
-      throw new Error(`producto_no_encontrado: El producto con ID ${item.producto_id} no existe en el catálogo`);
-    }
-
-    // Validación: Stock insuficiente (Error 409)
-    if (productoExistente.stock < item.cantidad) {
-      throw new Error(`stock_insuficiente: No hay suficiente stock para ${productoExistente.titulo}. Disponible: ${productoExistente.stock}, Solicitado: ${item.cantidad}`);
-    }
-
-    // Si pasa las validaciones, devolvemos el objeto con el formato correcto
-    return {
-      producto_id: item.producto_id,
-      titulo: productoExistente.titulo,
-      stockRestante: productoExistente.stock - item.cantidad
-    };
+  const response = await fetch(`${SELLER_API_URL}/api/orders/reserve`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
+    body: JSON.stringify(payload),
   });
 
- 
-  return {
-    estado: "reservado",
-    items: itemsRespondidos
-  };
-};
-
-//para cuando integre la api
-// export async function reservarStock(payload: ReservePayload, token: string): Promise<ReserveResponse> {
   
-  
-//   const response = await fetch(`${SELLER_API_URL}/api/orders/reserve`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       "Authorization": `Bearer ${token}`
-//     },
-//     body: JSON.stringify(payload),
-//   });
+  if (!response.ok) {
+    // 🔴 DEBUG: Leemos la respuesta como texto crudo primero y la imprimimos en consola
+    const rawText = await response.text();
+    console.error(`ERROR DE LA API - STATUS: ${response.status}`, rawText);
 
-//   if (!response.ok) {
-//     if (response.status === 409) {
-//       throw new Error("stock_insuficiente");
-//     } else if (response.status === 404) {
-//       throw new Error("producto_no_encontrado");
-//     }
-//     const errorData = await response.json();
-//     throw new Error(errorData.mensaje || "Error al reservar stock");
-//   }
+    // Intentamos parsearlo a JSON, si falla usamos el rawText
+    let errorData;
+    try {
+        errorData = JSON.parse(rawText);
+    } catch (e) {
+        throw new Error(`La API falló y no devolvió JSON. Status: ${response.status}. Respuesta: ${rawText.substring(0, 100)}...`);
+    }
 
-//   return response.json();
-// }
+
+
+
+
+    //const errorData = await response.json().catch(() => ({ error: "Error desconocido en el servidor" }));
+    const mensajeError = errorData.error || "Fallo en la reserva";
+
+    switch (response.status) {
+      case 400:
+        throw new Error(`Faltan campos: ${mensajeError}`);
+      case 404:
+        throw new Error(`Producto no encontrado: ${mensajeError}`);
+      case 409:
+        throw new Error(`Conflicto: ${mensajeError}`);
+      default:
+        throw new Error(mensajeError);
+    }
+  }
+
+  // Retorna la respuesta 200 tipada correctamente
+  return response.json();
+}

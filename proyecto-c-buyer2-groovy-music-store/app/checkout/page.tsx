@@ -4,21 +4,20 @@ import prisma from '@/app/lib/prisma';
 import SimpleNavBar from '../ui/SimpleNavBar';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { getProductQuickDetail, getSellerPostalCode } from '../lib/services/seller-api';
+import { getProductsBatch, getSellerInfo } from '../lib/services/seller-api';
 import FormularioCheckout from '../ui/FormularioCheckout'; 
-import { cookies } from 'next/headers'; 
 
 export const metadata = {
     title: 'Checkout - Groovy Music Store',
     description: 'Página de checkout para revisar tu orden antes de confirmar la compra',
 }
 
+//PESOS ESTIMADOS POR FORMATO DE PRODUCTO EN KG
 const PESOS_ESTIMADOS: Record<string, number> = {
   vinilo: 0.40,   
   cd: 0.12,      
   cassette: 0.08, 
 };
-
 const PESO_POR_DEFECTO = 0.20; 
 
 function calcularPesoTotal(items: any[]): number {
@@ -32,20 +31,14 @@ function calcularPesoTotal(items: any[]): number {
 export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ seller?: string }>; }) {
     const params = await searchParams;            
     const sellerId = params.seller;
-    const { userId: clerkId, getToken } = await auth(); 
+    
+    const { userId: clerkId } = await auth(); 
 
     if (!sellerId || !clerkId) {
         redirect('/');
     }
 
-   
-    const token = await getToken();
-
-    
-    if (!token) {
-        throw new Error("No se pudo obtener el token de autenticación");
-    }
-
+    // items del carrito actual
     const [itemsDb, direccionesDb] = await Promise.all([
         prisma.itemCarrito.findMany({
             where: { id_seller: sellerId, carrito: { clerk_id: clerkId } }
@@ -59,25 +52,58 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
         redirect('/');
     }
 
-    const itemsBorrador = await Promise.all(
-        itemsDb.map(async (item) => {
-            
-            const detalle = await getProductQuickDetail(item.producto_id);
-            return detalle ? { cantidad: item.cantidad, ...detalle } : null;
-        })
-    );
-    const itemsParaCheckout = itemsBorrador.filter(Boolean);
+    const productIds = itemsDb.map(item => item.producto_id);
+    const productosDetalle = await getProductsBatch(productIds);
 
-    const subtotal = itemsParaCheckout.reduce((acc, item) => acc + (item!.precio * item!.cantidad), 0);
-    const pesoTotal = calcularPesoTotal(itemsParaCheckout);
+    // productos no disponibles (sin stock o eliminados de la API)
+    const itemsValidos: any[] = [];
+    const idsProductosAEliminar: string[] = [];
+
+    itemsDb.forEach((item) => {
+        const detalle = productosDetalle.find(p => p.id === item.producto_id);
+        
+        // Criterio de eliminación: No viene en la API o su stock es 0
+        if (!detalle || detalle.stock === 0) {
+            idsProductosAEliminar.push(item.producto_id);
+        } else {
+            // Si el producto es válido, lo preparamos para el checkout
+            itemsValidos.push({
+                cantidad: item.cantidad,
+                ...detalle
+            });
+        }
+    });
+
+    // Limpieza de la Base de Datos si hay productos inválidos
+    if (idsProductosAEliminar.length > 0) {
+        await prisma.itemCarrito.deleteMany({
+            where: {
+                producto_id: { in: idsProductosAEliminar },
+                id_seller: sellerId,
+                carrito: { clerk_id: clerkId }
+            }
+        });
+
+        // Si después de la limpieza no quedo ningun producto, redirigimos al catálogo
+        if (itemsValidos.length === 0) {
+            redirect('/');
+        }
+    }
+
+    const subtotal = itemsValidos.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
+    const pesoTotal = calcularPesoTotal(itemsValidos);
 
     if (direccionesDb.length === 0) {
         throw new Error("El usuario no tiene direcciones cargadas para el envío.");
     }
 
-    // Obtenemos el CP del Vendedor 
-    const origen_cp = await getSellerPostalCode(sellerId,token);
+   
+    const sellerInfo = await getSellerInfo(sellerId);
 
+    const origen_cp = sellerInfo?.codigo_postal || '';
+    const nombre_seller = sellerInfo?.nombre_fantasia || 'Vendedor Desconocido';
+
+   
 
     return (
         <main className="min-h-screen bg-background font-dm pb-20">
@@ -94,20 +120,19 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
                 <header className="mb-10">
                     <h1 className="text-3xl md:text-4xl font-bold font-syne mb-2">Resumen de tu Orden</h1>
                     <p className="text-foreground/70 text-lg">
-                        Comprando los productos del vendedor: <span className="font-semibold text-primary">{sellerId}</span>
+                        Comprando los productos del vendedor: <span className="font-semibold text-primary">{nombre_seller}</span>
                     </p>
                 </header>
             
                 
                 <FormularioCheckout 
-                    itemsParaCheckout={itemsParaCheckout}
+                    itemsParaCheckout={itemsValidos}
                     direccionesDb={direccionesDb}
                     clerkId={clerkId}
                     sellerId={sellerId}
                     subtotal={subtotal}
                     pesoTotal={pesoTotal}
                     origen_cp={origen_cp}
-                    tokenDelUsuario={token}
                 />
             </div>
         </main>

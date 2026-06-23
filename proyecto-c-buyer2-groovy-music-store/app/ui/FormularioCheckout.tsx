@@ -26,8 +26,7 @@ export default function FormularioCheckout({
     sellerId, 
     subtotal, 
     pesoTotal, 
-    origen_cp, 
-    tokenDelUsuario 
+    origen_cp 
 }: any) {
     
     const initialState: CheckoutFormState = { 
@@ -72,7 +71,6 @@ export default function FormularioCheckout({
                     origen_cp,
                     cpDestino,
                     pesoTotal,
-                    tokenDelUsuario
                 );
                 setEnvioDinamico({ 
                     costo: result.costo, 
@@ -88,7 +86,7 @@ export default function FormularioCheckout({
         };
 
         calcularEnvio();
-    }, [cpDestino, origen_cp, pesoTotal, tokenDelUsuario]);
+    }, [cpDestino, origen_cp, pesoTotal]);
 
     const totalDinamico = subtotal + envioDinamico.costo;
 

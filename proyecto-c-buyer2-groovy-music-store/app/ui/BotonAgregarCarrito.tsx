@@ -19,6 +19,7 @@ export default function BotonAgregarCarrito({
     productoId, 
     stockTotal, 
     stockDisponible, 
+    setStockDisponible, 
     sellerId 
 }: BotonProps) {
     const pathname = usePathname();

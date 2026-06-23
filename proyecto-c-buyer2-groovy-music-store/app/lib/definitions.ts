@@ -81,6 +81,21 @@ export interface ReserveResponse {
   }>;
 }
 
+export interface SellerInfoResponse {
+  datos: {
+    id: string;
+    nombre_fantasia: string;
+    codigo_postal: string;
+    ciudad: string;
+    fecha_alta: string;
+  }
+}
+
+export interface SellerSummary {
+  nombre_fantasia: string;
+  codigo_postal: string;
+}
+
 //  SHIPPING APP 
 export type ShippingEstimate = {
   costo: number;

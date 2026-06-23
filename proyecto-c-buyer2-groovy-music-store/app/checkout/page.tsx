@@ -4,22 +4,46 @@ import prisma from '@/app/lib/prisma';
 import SimpleNavBar from '../ui/SimpleNavBar';
 import Link from 'next/link';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { getProductQuickDetail } from '../lib/services/seller-api';
-import { getShippingEstimate } from '../lib/services/shipping-api'; 
-import FormularioCheckout from '../ui/FormularioCheckout'; // Importamos el componente nuevo
+import { getProductQuickDetail, getSellerPostalCode } from '../lib/services/seller-api';
+import FormularioCheckout from '../ui/FormularioCheckout'; 
+import { cookies } from 'next/headers'; 
 
 export const metadata = {
     title: 'Checkout - Groovy Music Store',
     description: 'Página de checkout para revisar tu orden antes de confirmar la compra',
 }
 
+const PESOS_ESTIMADOS: Record<string, number> = {
+  vinilo: 0.40,   
+  cd: 0.12,      
+  cassette: 0.08, 
+};
+
+const PESO_POR_DEFECTO = 0.20; 
+
+function calcularPesoTotal(items: any[]): number {
+  return items.reduce((pesoAcumulado, item) => {
+    const formatoDelProducto = item.formato?.toLowerCase() || '';
+    const pesoUnitario = PESOS_ESTIMADOS[formatoDelProducto] || PESO_POR_DEFECTO;
+    return pesoAcumulado + (pesoUnitario * item.cantidad);
+  }, 0);
+}
+
 export default async function CheckoutPage({ searchParams }: { searchParams: Promise<{ seller?: string }>; }) {
     const params = await searchParams;            
     const sellerId = params.seller;
-    const { userId: clerkId } = await auth(); 
+    const { userId: clerkId, getToken } = await auth(); 
 
     if (!sellerId || !clerkId) {
         redirect('/');
+    }
+
+   
+    const token = await getToken();
+
+    
+    if (!token) {
+        throw new Error("No se pudo obtener el token de autenticación");
     }
 
     const [itemsDb, direccionesDb] = await Promise.all([
@@ -37,6 +61,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
 
     const itemsBorrador = await Promise.all(
         itemsDb.map(async (item) => {
+            
             const detalle = await getProductQuickDetail(item.producto_id);
             return detalle ? { cantidad: item.cantidad, ...detalle } : null;
         })
@@ -44,8 +69,15 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
     const itemsParaCheckout = itemsBorrador.filter(Boolean);
 
     const subtotal = itemsParaCheckout.reduce((acc, item) => acc + (item!.precio * item!.cantidad), 0);
-    const envio = await getShippingEstimate("8000", "1000", 0.5); 
-    const totalAPagar = subtotal + envio.costo;
+    const pesoTotal = calcularPesoTotal(itemsParaCheckout);
+
+    if (direccionesDb.length === 0) {
+        throw new Error("El usuario no tiene direcciones cargadas para el envío.");
+    }
+
+    // Obtenemos el CP del Vendedor 
+    const origen_cp = await getSellerPostalCode(sellerId,token);
+
 
     return (
         <main className="min-h-screen bg-background font-dm pb-20">
@@ -66,14 +98,16 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
                     </p>
                 </header>
             
+                
                 <FormularioCheckout 
                     itemsParaCheckout={itemsParaCheckout}
                     direccionesDb={direccionesDb}
                     clerkId={clerkId}
                     sellerId={sellerId}
                     subtotal={subtotal}
-                    envio={envio}
-                    totalAPagar={totalAPagar}
+                    pesoTotal={pesoTotal}
+                    origen_cp={origen_cp}
+                    tokenDelUsuario={token}
                 />
             </div>
         </main>

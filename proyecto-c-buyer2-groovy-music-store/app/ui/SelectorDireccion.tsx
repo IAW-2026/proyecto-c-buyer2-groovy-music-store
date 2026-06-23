@@ -1,33 +1,54 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { guardarNuevaDireccion } from '@/app/lib/actions/actions-direccion';
 import { Direccion } from '@/app/lib/definitions';
 
-export default function SelectorDireccion({ direcciones, clerkId }: { direcciones: Direccion[], clerkId: string }) {
+export default function SelectorDireccion({ 
+    direcciones, 
+    clerkId,
+    onPostalCodeChange 
+}: { 
+    direcciones: Direccion[], 
+    clerkId: string,
+    onPostalCodeChange?: (cp: string | null) => void 
+}) {
     const [listaDirecciones, setListaDirecciones] = useState<Direccion[]>(direcciones);
     const [seleccion, setSeleccion] = useState<string>(
         direcciones.length > 0 ? direcciones[0].id : 'nueva'
     );
     const [isPending, startTransition] = useTransition();
-    
-    // Estado para guardar los errores que devuelve Zod desde el servidor
     const [errores, setErrores] = useState<any>({});
-
     const [nuevaDir, setNuevaDir] = useState({
         calle: '', ciudad: '', provincia: '', cod_postal: '', pais: 'Argentina'
     });
 
+   
+    useEffect(() => {
+        if (onPostalCodeChange) {
+            if (seleccion === 'nueva') {
+                // Si está creando una nueva, no podemos calcular el envío aún
+                onPostalCodeChange(null);
+            } else {
+                // Buscamos el CP de la dirección seleccionada
+                const dirSeleccionada = listaDirecciones.find(d => d.id === seleccion);
+                if (dirSeleccionada) {
+                    onPostalCodeChange(dirSeleccionada.cod_postal);
+                }
+            }
+        }
+    }, [seleccion, listaDirecciones, onPostalCodeChange]);
+    
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNuevaDir({ ...nuevaDir, [e.target.name]: e.target.value });
-        // Limpiamos el error específico del campo al escribir
         if (errores[e.target.name]) {
             setErrores({ ...errores, [e.target.name]: undefined });
         }
     };
 
     const handleGuardarDireccion = async () => {
-        setErrores({}); // Limpiamos errores previos antes de intentar guardar
+        setErrores({}); 
         
         const formData = new FormData();
         Object.entries(nuevaDir).forEach(([key, value]) => formData.append(key, value));
@@ -36,7 +57,7 @@ export default function SelectorDireccion({ direcciones, clerkId }: { direccione
         startTransition(async () => {
             const resultado = await guardarNuevaDireccion(formData);
             
-            if (resultado.success && resultado.data) { // <--- Agregamos && resultado.data
+            if (resultado.success && resultado.data) { 
                 setListaDirecciones([...listaDirecciones, resultado.data]);
                 setSeleccion(resultado.data.id);
                 setNuevaDir({ calle: '', ciudad: '', provincia: '', cod_postal: '', pais: 'Argentina' });
@@ -52,7 +73,6 @@ export default function SelectorDireccion({ direcciones, clerkId }: { direccione
                 Dirección de Envío
             </h2>
 
-            {/* Input oculto que el formulario principal de Checkout va a leer */}
             <input type="hidden" name="id_direccion" value={seleccion} />
 
             {listaDirecciones.length > 0 && (
@@ -99,6 +119,7 @@ export default function SelectorDireccion({ direcciones, clerkId }: { direccione
                     className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 p-4 border border-border rounded-lg bg-foreground/5"
                     onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
                 >
+                  
                     <div className="col-span-2">
                         <label className="block text-sm font-medium mb-1">Calle y número</label>
                         <input type="text" name="calle" value={nuevaDir.calle} onChange={handleChange} className="w-full p-2.5 border border-border rounded-md bg-background" />

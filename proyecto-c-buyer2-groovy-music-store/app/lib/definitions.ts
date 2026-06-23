@@ -58,10 +58,33 @@ export type CatalogResponse = {
     };
 };
 
+export interface ReserveItemPayload {
+  producto_id: string;
+  cantidad: number;
+  precio_unit: number;
+}
+
+export interface ReservePayload {
+  order_id: string;
+  buyer_id: string;
+  seller_id: string;
+  items: ReserveItemPayload[];
+}
+
+// TODO : ver si hace falta o no
+export interface ReserveResponse {
+  estado: string;
+  items: Array<{
+    producto_id: string;
+    titulo: string;
+    stockRestante: number;
+  }>;
+}
+
 //  SHIPPING APP 
 export type ShippingEstimate = {
   costo: number;
-  fechaEntregaEstimada: number;
+  fechaEntregaEstimada: string;
 };
 
 export type EstadoEnvio = 'pendiente' | 'en_transito' | 'entregado' | 'cancelado';

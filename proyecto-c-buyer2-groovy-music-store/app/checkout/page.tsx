@@ -93,9 +93,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
     const subtotal = itemsValidos.reduce((acc, item) => acc + (item.precio * item.cantidad), 0);
     const pesoTotal = calcularPesoTotal(itemsValidos);
 
-    if (direccionesDb.length === 0) {
-        throw new Error("El usuario no tiene direcciones cargadas para el envío.");
-    }
+
 
    
     const sellerInfo = await getSellerInfo(sellerId);

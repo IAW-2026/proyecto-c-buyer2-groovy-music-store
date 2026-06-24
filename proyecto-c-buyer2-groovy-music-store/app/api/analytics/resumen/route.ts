@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/app/lib/prisma';
 import { z } from 'zod';
+import { EstadoOrden } from '@/app/lib/definitions';
 
 
 const querySchema = z.object({
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
         _sum: { monto: true },
         where: { 
           ...whereClause,
-          estado: { in: ['pagada', 'entregada'] } //  plata de órdenes concretadas
+          estado: { in: [EstadoOrden.PAGO_APROBADO, EstadoOrden.ENTREGADO] }//  plata de órdenes concretadas
         },
       }),
     ]);

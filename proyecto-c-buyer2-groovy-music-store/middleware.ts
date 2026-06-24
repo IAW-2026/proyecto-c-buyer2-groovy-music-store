@@ -2,7 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
-const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)', '/catalogo(.*)', '/auth-sync(.*)']);
+const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)', '/catalogo(.*)', '/auth-sync(.*)','/api/orders/cleanup']);
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
 const isIntegrationApiRoute = createRouteMatcher([
   '/api/orders/payment-status', 

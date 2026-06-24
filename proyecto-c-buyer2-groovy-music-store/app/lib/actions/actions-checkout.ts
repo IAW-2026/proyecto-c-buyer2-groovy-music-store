@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import prisma from '@/app/lib/prisma';
 import { z } from 'zod'; 
 import { reservarStock } from '@/app/lib/services/seller-api'; 
+import { EstadoOrden } from '../definitions';
 
 const CheckoutSchema = z.object({
     sellerId: z.string().min(1, "Falta el ID del vendedor"),
@@ -47,7 +48,7 @@ export async function procesarCheckout(prevState: any, formData: FormData) {
         nuevaOrden = await prisma.orden.create({
             data: {
                 monto: total,
-                estado: 'Procesando',
+                estado: EstadoOrden.PROCESANDO,
                 empresa_envio: 'Logística Standard',
                 id_seller: sellerId, 
                 buyer: { connect: { clerk_id: clerkId } },
@@ -66,11 +67,11 @@ export async function procesarCheckout(prevState: any, formData: FormData) {
         return { success: false, errors: {}, message: 'Error interno al generar la orden.' };
     }
 
-    const idOrdenReal = nuevaOrden.nro_orden_usuario.toString();
+    const uuid_orden_creada = nuevaOrden.nro_orden;
 
     // INTENTAR RESERVAR EL STOCK EN LA API EXTERNA
     const payloadReserva = {
-        order_id: idOrdenReal, 
+        order_id: uuid_orden_creada, 
         buyer_id: clerkId,
         seller_id: sellerId,
         items: itemsComprados.map((item: any) => ({
@@ -126,5 +127,5 @@ export async function procesarCheckout(prevState: any, formData: FormData) {
     }
 
     // REDIRIGIR AL PAGO 
-    redirect(`/checkout/pago/${idOrdenReal}`);
+    redirect(`/checkout/pago/${uuid_orden_creada}`);
 }

@@ -20,6 +20,15 @@ export type ItemCheckout = ProductSummary & {
   cantidad: number;
 };
 
+
+export enum EstadoOrden {
+  PROCESANDO = 'Procesando',
+  PAGO_APROBADO = 'Pago Aprobado',
+  PAGO_RECHAZADO = 'Pago Rechazado',
+  CANCELADO = 'Cancelado',
+  EN_CAMINO = 'En camino',
+  ENTREGADO = 'Entregado'
+}
 //  SELLER APP
 export type Product = {
     id: string;
@@ -71,7 +80,7 @@ export interface ReservePayload {
   items: ReserveItemPayload[];
 }
 
-// TODO : ver si hace falta o no
+
 export interface ReserveResponse {
   estado: string;
   items: Array<{
@@ -109,4 +118,22 @@ export interface ShipmentResponse {
     codigoSeguimiento: string;
     estado: EstadoEnvio;
     fechaEntregaEstimada: string;
+}
+
+//PAYMENTS APP
+export interface CheckoutPayload {
+    order_id: string;
+    buyer_id: string;
+    seller_id: string; 
+    costoEnvio: number;
+    monto_total: number;
+}
+
+export interface PaymentServiceResult {
+    success: boolean;
+    data?: {
+        transaccion_id: number;
+        init_point: string;
+    };
+    error?: string;
 }

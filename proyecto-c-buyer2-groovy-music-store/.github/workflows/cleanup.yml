@@ -1,0 +1,13 @@
+name: Cleanup Orders Cron
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Cada 15 minutos
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar a la API de limpieza
+        run: |
+          curl -X GET "https://proyecto-c-buyer2-groovy-music-store.vercel.app/api/orders/cleanup" \
+          -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

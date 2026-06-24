@@ -3,7 +3,7 @@ import prisma from '@/app/lib/prisma';
 import { liberarStock } from '@/app/lib/services/seller-api';
 
 export async function GET(request: NextRequest) {
-  // En producción (Vercel), protegemos el endpoint para que solo lo pueda despertar Vercel
+  // Protección de la ruta: verificamos que el token coincida con el guardado en Vercel
   const authHeader = request.headers.get('authorization');
   if (process.env.NODE_ENV === 'production' && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const ordenesAbandonadas = await prisma.orden.findMany({
       where: {
         estado: 'Procesando',
-        fecha: { lt: tiempoLimite } 
+        fecha: { lt: tiempoLimite } // lt: "less than" (creadas antes de esa hora)
       },
       include: { items: true }
     });
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     // Procesamos cada orden olvidada una por una
     for (const orden of ordenesAbandonadas) {
       try {
-        // 1. Notificamos la liberación de stock a la API de  seller-api
+        // 1. Notificamos la liberación de stock a la  Seller App
         await liberarStock({
           order_id: orden.nro_orden,
           items: orden.items.map(item => ({
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
           }))
         });
 
-        // 2. Buscamos el carrito del comprador para restaurar los productos
+        // 2. Buscamos el carrito del comprador local para restaurar los productos
         const carritoUsuario = await prisma.carrito.findFirst({
           where: { clerk_id: orden.id_buyer }
         });
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
             id_seller: orden.id_seller
           }));
 
-          
+          // createMany con skipDuplicates evita errores si el usuario volvió a meter el ítem a mano
           await prisma.itemCarrito.createMany({
             data: itemsParaRestaurar,
             skipDuplicates: true
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
           data: { estado: 'Cancelado' }
         });
 
-        console.log(`[Cleanup] Orden abandonada #${orden.nro_orden_usuario} cancelada con éxito.`);
+        console.log(`[Cleanup] Orden abandonada #${orden.nro_orden_usuario} cancelada y stock restaurado con éxito.`);
       } catch (errOrden) {
         console.error(`[Cleanup] Error procesando la limpieza de la orden ${orden.nro_orden}:`, errOrden);
       }
@@ -69,11 +69,11 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ 
       success: true, 
       procesadas: ordenesAbandonadas.length, 
-      mensaje: "Limpieza de fondo completada." 
+      mensaje: "Limpieza de fondo completada correctamente." 
     });
 
   } catch (error) {
-    console.error("Error general en el Cron Job de limpieza:", error);
+    console.error("Error general en la API de limpieza:", error);
     return NextResponse.json({ error: "internal_error" }, { status: 500 });
   }
 }

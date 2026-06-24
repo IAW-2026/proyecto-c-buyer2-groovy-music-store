@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/app/lib/prisma';
 import { z } from 'zod';
+import { EstadoOrden } from '@/app/lib/definitions';
 
 const querySchema = z.object({
-  fecha_desde: z.string().datetime().optional(),
-  fecha_hasta: z.string().datetime().optional(),
-  // Validamos que el intervalo solo pueda ser 'dia' o 'mes', por defecto 'dia'
+  fecha_desde: z.string().optional(),
+  fecha_hasta: z.string().optional(),
   intervalo: z.enum(['dia', 'mes']).default('dia'), 
 });
 
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
     const ordenes = await prisma.orden.findMany({
       where: {
         ...whereClause,
-        estado: { in: ['pagada', 'entregada'] }
+        estado: { in: [EstadoOrden.PAGO_APROBADO, EstadoOrden.ENTREGADO] }
       },
       select: {
         fecha: true,
@@ -52,7 +52,6 @@ export async function GET(request: Request) {
 
     const agrupado = ordenes.reduce((acc: Agrupacion, orden) => {
       const fechaISO = orden.fecha.toISOString();
-      
       
       // Si es 'dia', tomamos los primeros 10 caracteres: "2026-04-15"
       // Si es 'mes', tomamos los primeros 7 caracteres: "2026-04"

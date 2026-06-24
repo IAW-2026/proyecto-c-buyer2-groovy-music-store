@@ -31,8 +31,17 @@ export async function GET(request: Request) {
     const whereClause: any = {};
     if (fecha_desde || fecha_hasta) {
       whereClause.fecha = {};
-      if (fecha_desde) whereClause.fecha.gte = new Date(fecha_desde);
-      if (fecha_hasta) whereClause.fecha.lte = new Date(fecha_hasta);
+      
+      // Agregamos la hora exacta para cubrir el día entero.
+      // Si mandan "2026-06-24", se convierte en "2026-06-24T00:00:00.000Z"
+      if (fecha_desde) {
+        whereClause.fecha.gte = new Date(`${fecha_desde}T00:00:00.000Z`);
+      }
+      
+      // Si mandan "2026-06-24", se convierte en "2026-06-24T23:59:59.999Z" (final del día)
+      if (fecha_hasta) {
+        whereClause.fecha.lte = new Date(`${fecha_hasta}T23:59:59.999Z`);
+      }
     }
 
     // Traemos las órdenes. Solo sumamos aquellas que generan ingresos reales.
@@ -72,7 +81,6 @@ export async function GET(request: Request) {
     return NextResponse.json(Object.values(agrupado));
 
   } catch (error) {
-    console.error("Error en /api/analytics/orders/time-series:", error);
     return NextResponse.json(
       { error: "internal_error", mensaje: "Error al generar la serie temporal" },
       { status: 500 }

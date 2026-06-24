@@ -4,7 +4,12 @@ import { jwtVerify } from "jose";
 
 const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)', '/catalogo(.*)', '/auth-sync(.*)']);
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
-const isIntegrationApiRoute = createRouteMatcher(['/api/orders/payment-status', '/api/orders/shipping-status']);
+const isIntegrationApiRoute = createRouteMatcher([
+  '/api/orders/payment-status', 
+  '/api/orders/shipping-status',
+  '/api/analytics(.*)', 
+  '/api/control-plane(.*)'
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   // 1. Validar tokens de integración (Payments y Shipping)
@@ -17,7 +22,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     try {
       const token = authHeader.split(' ')[1];
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+      const secret = new TextEncoder().encode(process.env.BUYER_JWT_SECRET);
       await jwtVerify(token, secret);
       return NextResponse.next();
     } catch {

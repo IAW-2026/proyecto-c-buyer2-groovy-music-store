@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link' 
 import NavBar from '@/app/ui/NavBar'
 import Pagination from '@/app/ui/Pagination'
-import { currentUser } from "@clerk/nextjs/server"
+import { currentUser } from "@clerk/nextjs/server" 
 import { getCatalog } from '@/app/lib/services/seller-api'
 
 export const metadata = {
@@ -16,14 +16,15 @@ export default async function CatalogPage({
     searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
     
+
     const params = await searchParams;
     const currentPage = Number(params?.page) || 1;
     const query = typeof params?.q === 'string' ? params.q : "";
     
-    // Capturamos el formato actual de la URL (por defecto "TODO")
+    
     const currentFormato = typeof params?.formato === 'string' ? params.formato : "TODO";
 
-    // Pasamos el formato correcto a la API
+   
     const { data: products, meta } = await getCatalog({ 
         page: currentPage, 
         limit: 12, 
@@ -59,7 +60,6 @@ export default async function CatalogPage({
                                 aria-label={`Filtrar por ${cat}`}
                                 className={`px-4 py-1.5 rounded-full font-bold border-2 transition-all duration-300 ${
                                     isActive 
-                                        // 1. CORRECCIÓN BOTÓN ACTIVO: Terracota oscuro
                                         ? "bg-[#B83A15] text-white border-[#9C2E0F] shadow-sm text-shadow-contrast"
                                         : "bg-transparent text-white/90 border-transparent hover:text-white hover:border-white/30"
                                 }`}

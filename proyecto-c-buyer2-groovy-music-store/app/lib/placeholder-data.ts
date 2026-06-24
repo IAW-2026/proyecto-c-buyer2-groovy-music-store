@@ -1,4 +1,4 @@
-import { Product, ProductSummary } from './definitions';
+import { Product, ProductSummary, FormatoProducto } from './definitions';
 import { ShippingEstimate, ShipmentResponse } from "./definitions";
 
 //SELLER APP
@@ -11,7 +11,7 @@ export const mockProducts: Product[] = [
     artista: 'The Beatles',
     precio: 95410, 
     stock: 8,
-    formato: 'Vinilo LP',
+    formato: FormatoProducto.VINILO,
     condicion: 'Nuevo',
     genero: 'Rock',
     imagenes: ['/images/products/beatles-blue-vinyl.jpg'],
@@ -24,7 +24,7 @@ export const mockProducts: Product[] = [
     artista: 'Taylor Swift',
     precio: 97900, 
     stock: 10,
-    formato: 'Vinilo LP',
+    formato: FormatoProducto.VINILO,
     condicion: 'Nuevo',
     genero: 'Pop',
     
@@ -43,7 +43,7 @@ export const mockProducts: Product[] = [
     artista: 'Juanes',
     precio: 45500, 
     stock: 0, 
-    formato: 'Vinilo LP',
+    formato: FormatoProducto.VINILO,
     condicion: 'Nuevo',
     genero: 'Pop Latino',
     imagenes: [
@@ -60,7 +60,7 @@ export const mockProducts: Product[] = [
     artista: 'Soda Stereo',
     precio: 55000, 
     stock: 1, 
-    formato: 'Vinilo LP',
+    formato: FormatoProducto.VINILO,
     condicion: 'Usado', 
     genero: 'Rock',
     imagenes: ['/images/products/soda-cancion.jpg'],
@@ -73,7 +73,7 @@ export const mockProducts: Product[] = [
     artista: 'Lady Gaga',
     precio: 16450, 
     stock: 5, 
-    formato: 'CD',
+    formato: FormatoProducto.CD,
     condicion: 'Nuevo',
     genero: 'Pop',
     imagenes: [
@@ -92,7 +92,7 @@ export const mockProducts: Product[] = [
     artista: 'Katy Perry',
     precio: 24700, 
     stock: 1, 
-    formato: 'CD',
+    formato: FormatoProducto.CD,
     condicion: 'Usado', 
     genero: 'Pop',
     imagenes: [
@@ -107,7 +107,7 @@ export const mockProducts: Product[] = [
     artista: 'The Cure',
     precio: 18500, 
     stock: 7, 
-    formato: 'Cassette',
+    formato: FormatoProducto.CASSETTE,
     condicion: 'Nuevo',
     genero: 'Rock',
     imagenes: [
@@ -124,7 +124,7 @@ export const mockProducts: Product[] = [
     artista: 'Sabrina Carpenter',
     precio: 25500, 
     stock: 12, 
-    formato: 'Cassette',
+    formato: FormatoProducto.CASSETTE,
     condicion: 'Nuevo', 
     genero: 'Pop',
     imagenes: [
@@ -166,9 +166,9 @@ export const simularCalculoEnvio = (
   destino_cp: string, 
   peso: number
 ): ShippingEstimate => {
-  return {
-    costo: 5500, 
-    fechaEntregaEstimada: 3
+ return {
+  costo: 5500, 
+  fechaEntregaEstimada: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString() // Genera la fecha de dentro de 3 días en ISO 8601
   };
 };
 

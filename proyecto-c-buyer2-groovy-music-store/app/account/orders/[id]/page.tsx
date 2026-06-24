@@ -1,4 +1,4 @@
-import { currentUser } from "@clerk/nextjs/server"
+import { currentUser, auth } from "@clerk/nextjs/server" 
 import { redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
@@ -15,13 +15,21 @@ export const metadata: Metadata = {
 export default async function OrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     
     const user = await currentUser();
+    const { getToken } = await auth();
 
     if (!user) {
         redirect('/sign-in');
     }
 
-    const { id } = await params;
+    // Extraemos el token JWT de Clerk
+    const token = await getToken();
 
+    
+    if (!token) {
+        throw new Error("No se pudo obtener el token de autenticación");
+    }
+
+    const { id } = await params;
     const orderId = parseInt(id);
 
     if (isNaN(orderId)) {

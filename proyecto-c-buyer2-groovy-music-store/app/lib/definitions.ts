@@ -1,5 +1,12 @@
-//buyer app
+// --- TYPESCRIPT ENUMS ---
+export enum FormatoProducto {
+  VINILO = 'VINILO',
+  CD = 'CD',
+  CASSETTE = 'CASSETTE',
+  OTRO = 'OTRO'
+}
 
+// BUYER APP 
 export type Direccion = {
     id: string;
     calle: string;
@@ -13,23 +20,21 @@ export type ItemCheckout = ProductSummary & {
   cantidad: number;
 };
 
-
-//seller app
-
+//  SELLER APP
 export type Product = {
-  id: string;
-  titulo: string; 
-  descripcion?: string; //ver si hac al final hace falta o no
-  artista: string;
-  precio: number;
-  stock: number;
-  formato: string;
-  condicion: string;
-  genero: string;
-  imagenes: string[];
-  seller_id: { 
-    id: string 
-  }; 
+    id: string;
+    titulo: string; 
+    descripcion?: string;
+    artista: string;
+    precio: number;
+    stock: number;
+    formato: FormatoProducto; 
+    condicion: string;
+    genero: string;
+    imagenes: string[];
+    seller_id: { 
+        id: string 
+    }; 
 };
 
 export type ProductSummary = Pick<Product, 'id' | 'titulo' | 'artista' | 'precio' | 'stock' | 'seller_id'> & {
@@ -37,28 +42,64 @@ export type ProductSummary = Pick<Product, 'id' | 'titulo' | 'artista' | 'precio
 };
 
 export type HydratedCartItem = {
-  id_carrito: string;
-  producto_id: string;
-  cantidad: number;
-  producto: ProductSummary; 
+    id_carrito: string;
+    producto_id: string;
+    cantidad: number;
+    producto: ProductSummary; 
 };
-
 
 export type CatalogResponse = {
-  datos: Product[];
-  paginacion: {
-    pagina: number;
-    limite: number;
-    total: number;
-    totalPaginas: number;
-  };
+    datos: Product[];
+    paginacion: {
+        pagina: number;
+        limite: number;
+        total: number;
+        totalPaginas: number;
+    };
 };
 
+export interface ReserveItemPayload {
+  producto_id: string;
+  cantidad: number;
+  precio_unit: number;
+}
 
-// Shipping app
+export interface ReservePayload {
+  order_id: string;
+  buyer_id: string;
+  seller_id: string;
+  items: ReserveItemPayload[];
+}
+
+// TODO : ver si hace falta o no
+export interface ReserveResponse {
+  estado: string;
+  items: Array<{
+    producto_id: string;
+    titulo: string;
+    stockRestante: number;
+  }>;
+}
+
+export interface SellerInfoResponse {
+  datos: {
+    id: string;
+    nombre_fantasia: string;
+    codigo_postal: string;
+    ciudad: string;
+    fecha_alta: string;
+  }
+}
+
+export interface SellerSummary {
+  nombre_fantasia: string;
+  codigo_postal: string;
+}
+
+//  SHIPPING APP 
 export type ShippingEstimate = {
   costo: number;
-  fechaEntregaEstimada: number;
+  fechaEntregaEstimada: string;
 };
 
 export type EstadoEnvio = 'pendiente' | 'en_transito' | 'entregado' | 'cancelado';
@@ -69,4 +110,3 @@ export interface ShipmentResponse {
     estado: EstadoEnvio;
     fechaEntregaEstimada: string;
 }
-

@@ -2,16 +2,14 @@
 
 import { redirect } from 'next/navigation';
 import prisma from '@/app/lib/prisma';
-import { z } from 'zod';
-
+import { z } from 'zod'; 
+import { reservarStock } from '@/app/lib/services/seller-api'; 
 
 const CheckoutSchema = z.object({
     sellerId: z.string().min(1, "Falta el ID del vendedor"),
     clerkId: z.string().min(1, "Falta el ID del comprador"),
     total: z.coerce.number().gt(0, "El total debe ser mayor a 0"),
     id_direccion: z.string().min(1, "Debes seleccionar una dirección de envío para continuar"),
-    
-    // Verificamos que el JSON de items no venga roto ni vacío
     items: z.string().refine((val) => {
         try { 
             const parsed = JSON.parse(val);
@@ -22,10 +20,8 @@ const CheckoutSchema = z.object({
     }, { message: "Formato de items inválido" })
 });
 
-
 export async function procesarCheckout(prevState: any, formData: FormData) {
-    
-    
+    // VALIDACIÓN DE DATOS
     const validacion = CheckoutSchema.safeParse({
         sellerId: formData.get('sellerId'),
         clerkId: formData.get('clerkId'),
@@ -34,7 +30,6 @@ export async function procesarCheckout(prevState: any, formData: FormData) {
         items: formData.get('items'),
     });
 
-   
     if (!validacion.success) {
         return {
             success: false,
@@ -43,60 +38,93 @@ export async function procesarCheckout(prevState: any, formData: FormData) {
         };
     }
 
-   
     const { sellerId, clerkId, total, id_direccion, items } = validacion.data;
     const itemsComprados = JSON.parse(items);
-    
-    let idRedirect = "";
+
+    //  CREAR LA ORDEN BASE EN LA BASE DE DATOS LOCAL
+    let nuevaOrden;
+    try {
+        nuevaOrden = await prisma.orden.create({
+            data: {
+                monto: total,
+                estado: 'Procesando',
+                empresa_envio: 'Logística Standard',
+                id_seller: sellerId, 
+                buyer: { connect: { clerk_id: clerkId } },
+                direccion: { connect: { id: id_direccion } },
+                items: {
+                    create: itemsComprados.map((item: any) => ({
+                        producto_id: item.id,
+                        cantidad: item.cantidad,
+                        precio_unit: item.precio
+                    }))
+                }
+            }
+        });
+    } catch (error) {
+        console.error("Error al crear la orden base:", error);
+        return { success: false, errors: {}, message: 'Error interno al generar la orden.' };
+    }
+
+    const idOrdenReal = nuevaOrden.nro_orden_usuario.toString();
+
+    // INTENTAR RESERVAR EL STOCK EN LA API EXTERNA
+    const payloadReserva = {
+        order_id: idOrdenReal, 
+        buyer_id: clerkId,
+        seller_id: sellerId,
+        items: itemsComprados.map((item: any) => ({
+            producto_id: item.id, 
+            cantidad: item.cantidad,
+            precio_unit: item.precio
+        }))
+    };
 
     try {
-        // Transacción intacta para mantener la integridad
-        const nuevaOrden = await prisma.$transaction(async (tx) => {
-            const orden = await tx.orden.create({
-                data: {
-                    monto: total,
-                    estado: 'Pendiente de envio',
-                    empresa_envio: 'Logística Standard',
-                    
-                    id_seller: sellerId, 
-                    
-                    buyer: {
-                        connect: { clerk_id: clerkId }
-                    },
-                    
-                    direccion: {
-                        connect: { id: id_direccion }
-                    },
-                    
-                    items: {
-                        create: itemsComprados.map((item: any) => ({
-                            producto_id: item.id,
-                            cantidad: item.cantidad,
-                            precio_unit: item.precio
-                        }))
-                    }
+        await reservarStock(payloadReserva);
+    } catch (error: any) {
+        const mensajeError = error.message || "";
+
+        // ROLLBACK: Borramos la orden local porque falló la reserva externa
+        await prisma.itemOrden.deleteMany({
+            where: { nro_orden: nuevaOrden.nro_orden }
+        });
+
+        await prisma.orden.delete({
+            where: { nro_orden: nuevaOrden.nro_orden }
+        });
+
+        // LIMPIEZA PARCIAL: Si el error fue por stock, sacamos solo esos productos del carrito
+        if (mensajeError.includes("stock_insuficiente") || mensajeError.includes("producto_no_encontrado")) {
+            const idsProductos = payloadReserva.items.map((i: any) => i.producto_id);
+            
+            await prisma.itemCarrito.deleteMany({
+                where: { 
+                    id_seller: sellerId,
+                    carrito: { clerk_id: clerkId },
+                    producto_id: { in: idsProductos } 
                 }
             });
 
-            await tx.itemCarrito.deleteMany({
-                where: { id_seller: sellerId, carrito: { clerk_id: clerkId } }
-            });
-
-            return orden;
-        });
-
-        // Guardamos el ID para usarlo fuera del try/catch
-        idRedirect = nuevaOrden.nro_orden_usuario.toString();
-
-    } catch (error) {
-        console.error("Error al procesar el checkout en Prisma:", error);
-        return { 
-            success: false, 
-            errors: {}, 
-            message: 'Hubo un error interno al crear la orden. Intentá nuevamente.' 
-        };
+            return {
+                success: false,
+                errors: {},
+                message: "Lo sentimos, uno o más productos se agotaron recién. Tu carrito se ha actualizado."
+            };
+        }
+        
+        return { success: false, errors: {}, message: mensajeError || 'Error al reservar el stock.' };
     }
 
-    //  Redirigimos de forma segura fuera del bloque try/catch
-    redirect(`/checkout/pago/${idRedirect}`);
+    // La reserva fue exitosa, vaciamos todo el carrito del vendedor
+    try {
+        await prisma.itemCarrito.deleteMany({
+            where: { id_seller: sellerId, carrito: { clerk_id: clerkId } }
+        });
+    } catch (error) {
+        console.error("Error no crítico: no se pudo vaciar el carrito post-reserva", error);
+    }
+
+    // REDIRIGIR AL PAGO 
+    redirect(`/checkout/pago/${idOrdenReal}`);
 }

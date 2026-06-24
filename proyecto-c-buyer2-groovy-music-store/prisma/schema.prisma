@@ -1,0 +1,83 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Usuario {
+  clerk_id             String      @id
+  nombre               String
+  mail                 String
+  
+  direcciones          Direccion[]
+  carritos             Carrito[]
+  
+  ordenesComoComprador Orden[]   @relation("BuyerOrders")
+}
+
+model Direccion {
+  id         String   @id @default(uuid()) @db.Uuid
+  calle      String
+  ciudad     String
+  provincia  String
+  cod_postal String
+  pais       String
+  
+  clerk_id   String
+  usuario    Usuario  @relation(fields: [clerk_id], references: [clerk_id])
+
+  ordenes    Orden[]
+}
+
+model Carrito {
+  id_carrito  String        @id @default(uuid()) @db.Uuid
+  clerk_id    String
+  
+  usuario     Usuario       @relation(fields: [clerk_id], references: [clerk_id])
+  items       ItemCarrito[]
+}
+
+model ItemCarrito {
+  producto_id String   @db.Uuid 
+  cantidad    Int
+  id_carrito  String   @db.Uuid 
+  id_seller   String
+
+  carrito     Carrito  @relation(fields: [id_carrito], references: [id_carrito])
+  
+
+  @@id([id_carrito, producto_id])
+}
+
+model Orden {
+  nro_orden    String   @id @default(uuid()) @db.Uuid // PK para DB
+  nro_orden_usuario    Int      @default(autoincrement()) @unique   // Para el cliente
+ 
+  monto         Float
+  estado        String
+  fecha         DateTime @default(now())
+  empresa_envio String
+
+  id_buyer      String
+  id_seller     String
+  buyer         Usuario  @relation("BuyerOrders", fields: [id_buyer], references: [clerk_id])      
+
+  id_direccion  String      @db.Uuid 
+  direccion     Direccion   @relation(fields: [id_direccion], references: [id])
+
+
+  items         ItemOrden[]
+}
+
+model ItemOrden {
+  id_item_orden String    @id @default(uuid()) @db.Uuid
+  nro_orden     String    @db.Uuid
+  producto_id   String    @db.Uuid // Dato externo a la Seller App
+  cantidad      Int
+  precio_unit   Float
+
+  orden         Orden     @relation(fields: [nro_orden], references: [nro_orden])
+}

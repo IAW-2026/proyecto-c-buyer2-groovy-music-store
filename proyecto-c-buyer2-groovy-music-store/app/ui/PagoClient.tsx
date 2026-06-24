@@ -1,58 +1,51 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import SimpleNavBar from "@/app/ui/SimpleNavBar";
+import { getOrderByUUID } from "@/app/lib/actions/actions-order"; 
 
-export default function PagoClient({ ordenId }: { ordenId: string }) {
-    const router = useRouter();
+import { createPaymentCheckout } from "@/app/lib/services/payments-api"; 
+
+export default function PagoClient({ orden_UUID }: { orden_UUID: string }) {
+    const [error, setError] = useState<string | null>(null);
+    const [nroOrdenUsuario, setNroOrdenUsuario] = useState<number | null>(null);
 
     useEffect(() => {
-        // --- MOCK TEMPORAL hasta conectar las apps ---
-        const timer = setTimeout(() => {
-            // Actualmente simula éxito. Para simular error temporalmente, 
-            // comentá la línea de abajo y descomentá la de pago-fallido
-            router.push(`/checkout/orden-confirmada/${ordenId}`);
-            // router.push(`/checkout/pago-fallido/${ordenId}`);
-        }, 3000);
+        const iniciarPago = async () => {
+            try {
+                const orden = await getOrderByUUID(orden_UUID);
 
-        return () => clearTimeout(timer);
+                if (!orden) {
+                    setError("No se pudo encontrar la información de la orden.");
+                    return;
+                }
 
-
-        // El flujo exacto cuando esten las apps conectadas:
-
-        // El usuario está mirando la pantalla PagoClient esperando.
-
-        // Por atrás, en otro servidor, la App de Payments procesa la tarjeta.
-
-        // La App de Payments hace un POST apuntando a la URL  en tu App Buyer.
-
-        // el  backend recibe ese POST, actualiza la orden a "rechazado" o "aprobado" en tu base de datos (y si es rechazado, hace el POST a la Seller App para liberar stock).
-
-        // Tu PagoClient (que estaba preguntando cada 3 segundos a tu base de datos) lee el nuevo estado y cambia de pantalla.
-        // // ---------------------
-
-        /* // --- CÓDIGO REAL CON SERVER ACTION para cuando estén las apps conectadas ---
-        const verifyPayment = async () => {
-            const estado = await checkOrderStatus(ordenId); 
-
-            if (estado === "aprobado") {
-                clearInterval(intervalId); // Frenamos el polling
-                router.push(`/checkout/orden-confirmada/${ordenId}`); 
-            } 
-            // logica para estados de falla
-            else if (estado === "cancelada" || estado === "pago_fallido" || estado === "rechazado") {
-                clearInterval(intervalId); // Frenamos el polling
                 
-                // Redirigimos a una nueva pantalla de error (que vas a tener que crear)
-                router.push(`/checkout/pago-fallido/${ordenId}`); 
+                setNroOrdenUsuario(orden.nro_orden_usuario);
+
+                const resultado = await createPaymentCheckout({
+                    order_id: orden_UUID,
+                    buyer_id: orden.id_buyer,
+                    seller_id: orden.id_seller,
+                    costoEnvio: 0, 
+                    monto_total: orden.monto
+                });
+
+                if (resultado.success && resultado.data?.init_point) {
+                    window.location.href = resultado.data.init_point;
+                } else {
+                    setError(resultado.error || "Hubo un problema al generar el link de pago.");
+                }
+
+            } catch (err) {
+                console.error("Error en el flujo de pago:", err);
+                setError("Ocurrió un error inesperado. Por favor, intenta nuevamente.");
             }
         };
 
-        const intervalId = setInterval(verifyPayment, 3000);
-        return () => clearInterval(intervalId);
-        // -------------------------------- */
-    }, [ordenId, router]);
+        iniciarPago();
+        
+    }, [orden_UUID]);
 
     return (
         <main className="min-h-screen bg-background font-dm pb-20">
@@ -61,9 +54,16 @@ export default function PagoClient({ ordenId }: { ordenId: string }) {
                 <h1 className="font-syne m-0 text-4xl font-semibold text-foreground">
                     Pagos
                 </h1>
-                <p className="text-foreground/60 text-lg">
-                    Procesando tu pago para la orden #{ordenId}. Por favor, no cierres ni recargues la página...
-                </p>
+                
+                {error ? (
+                    <div className="mt-4">
+                        <p className="text-red-500 text-lg font-medium">{error}</p>
+                    </div>
+                ) : (
+                    <p className="text-foreground/60 text-lg mt-4">
+                        Generando tu link de pago para la orden {nroOrdenUsuario ? `#${nroOrdenUsuario}` : "..."}. Serás redirigido en un momento, por favor no cierres ni recargues la página...
+                    </p>
+                )}
             </div>
         </main>
     );

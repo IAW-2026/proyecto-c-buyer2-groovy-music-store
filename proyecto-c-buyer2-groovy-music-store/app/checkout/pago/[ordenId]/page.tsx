@@ -10,5 +10,5 @@ export default async function PagoPage({ params }: { params: Promise<{ ordenId: 
     
     const { ordenId } = await params;
 
-    return <PagoClient ordenId={ordenId} />;
+    return <PagoClient orden_UUID={ordenId} />;
 }

@@ -41,3 +41,23 @@ export async function getUserOrders(clerkId: string) {
         return [];
     }
 }
+
+
+export async function getOrderByUUID(ordenId: string) {
+    try {
+        const orden = await prisma.orden.findUnique({
+            where: { nro_orden: ordenId }, 
+            select: {
+                id_buyer: true,  
+                id_seller: true,
+                monto: true,
+                nro_orden_usuario: true, // Lo traemos para mostrarlo en el cliente
+            }
+        });
+
+        return orden;
+    } catch (error) {
+        console.error("Error al buscar la orden en Prisma:", error);
+        return null;
+    }
+}

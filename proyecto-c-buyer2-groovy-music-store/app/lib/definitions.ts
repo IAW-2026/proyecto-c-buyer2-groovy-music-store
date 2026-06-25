@@ -26,6 +26,7 @@ export enum EstadoOrden {
   PAGO_APROBADO = 'Pago Aprobado',
   PAGO_RECHAZADO = 'Pago Rechazado',
   CANCELADO = 'Cancelado',
+  EN_PREPARACION='Envío en preparación',
   EN_CAMINO = 'En camino',
   ENTREGADO = 'Entregado'
 }
@@ -118,6 +119,10 @@ export interface ShipmentResponse {
     codigoSeguimiento: string;
     estado: EstadoEnvio;
     fechaEntregaEstimada: string;
+    empresa?: {
+        id: string;
+        nombre: string;
+    };
 }
 
 //PAYMENTS APP

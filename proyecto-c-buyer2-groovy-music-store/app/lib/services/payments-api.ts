@@ -40,7 +40,6 @@ export async function createPaymentCheckout(payload: CheckoutPayload): Promise<P
         const responseData = JSON.parse(responseText);
 
         // Retornamos los datos permitiendo ambos formatos por seguridad
-        //TODO: ACOMODAR CUANDO NOS PONGAMOS BIEN DE ACUERDO 
         return {
             success: true,
             data: {

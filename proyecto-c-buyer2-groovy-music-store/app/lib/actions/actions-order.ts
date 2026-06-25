@@ -51,7 +51,7 @@ export async function getOrderByUUID(ordenId: string) {
                 id_buyer: true,  
                 id_seller: true,
                 monto: true,
-                nro_orden_usuario: true, // Lo traemos para mostrarlo en el cliente
+                nro_orden_usuario: true, 
             }
         });
 
@@ -60,4 +60,13 @@ export async function getOrderByUUID(ordenId: string) {
         console.error("Error al buscar la orden en Prisma:", error);
         return null;
     }
+}
+
+export async function getUuidDeOrden(displayId: string | number) {
+    const orden = await prisma.orden.findUnique({
+        where: { nro_orden_usuario: Number(displayId) }, 
+        select: { nro_orden: true } 
+    });
+    
+    return orden?.nro_orden || null;
 }

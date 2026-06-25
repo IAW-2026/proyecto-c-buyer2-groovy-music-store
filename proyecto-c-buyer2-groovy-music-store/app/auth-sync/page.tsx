@@ -40,7 +40,13 @@ export default async function AuthSyncPage({ searchParams }: AuthSyncProps) {
 
     //  Si el usuario está activo, seguimos con la lógica normal 
     const resolvedSearchParams = await searchParams;
-    const isAdmin = user.publicMetadata?.roles === 'admin';
+  
+    
+  const userRoles = (user.publicMetadata?.roles as string[]) || [];
+
+    // Verificamos si el array incluye alguno de los roles de administrador
+    const isAdmin = userRoles.includes('admin') || userRoles.includes('super_admin') || userRoles.includes('admin_buyer');
+
     const rutaPorDefecto = isAdmin ? '/admin' : '/catalogo';
     
     const destinoFinal = resolvedSearchParams.returnTo || rutaPorDefecto;

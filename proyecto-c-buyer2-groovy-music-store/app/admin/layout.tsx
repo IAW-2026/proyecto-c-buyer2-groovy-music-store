@@ -10,11 +10,14 @@ export const metadata: Metadata = {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   //chequeo de que el usaurio sea admin efectivamente
   const { sessionClaims } = await auth();
+  
+  
+  const userRoles = (sessionClaims?.roles as string[]) || [];
 
-  if (sessionClaims?.roles !== "admin") {
+  
+  if (!userRoles.includes("admin") && !userRoles.includes("super_admin") && !userRoles.includes("admin_buyer")) {
     redirect("/");
   }
-
 
   return (
     <div className="bg-background min-h-screen">

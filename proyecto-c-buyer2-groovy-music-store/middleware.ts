@@ -16,7 +16,6 @@ const isIntegrationApiRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // 1. Validar tokens de integración 
   if (isIntegrationApiRoute(req)) {
     const authHeader = req.headers.get('Authorization');
 
@@ -36,15 +35,15 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 2. Lógica de Clerk
   const { sessionClaims } = await auth();
+  // AGREGAR ESTO TEMPORALMENTE
+  console.log("=== DEBUG MIDDLEWARE ===");
+  console.log("Ruta solicitada:", req.nextUrl.pathname);
+  console.log("Session Claims:", JSON.stringify(sessionClaims, null, 2));
 
-
-
-  if (isAdminRoute(req)) {
-  const userRoles = (sessionClaims?.roles as string[]) || [];
-  
-  const hasAccess = userRoles.some(role => ['admin', 'super_admin'].includes(role));
-
-  if (!hasAccess) {
+ if (isAdminRoute(req)) {
+  const roles = sessionClaims?.roles as string[] | undefined;
+  const esAdmin = roles?.some(r => ['admin', 'super_admin', 'admin_buyer'].includes(r));
+  if (!esAdmin) {
     return NextResponse.redirect(new URL('/', req.url));
   }
 }
@@ -56,12 +55,6 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    /*
-     * Excluye:
-     * - api/orders/cleanup 
-     * - _next (Archivos internos de Next.js)
-     * - Archivos estáticos (imágenes, favicons, etc)
-     */
     '/((?!api/orders/cleanup|_next|.*\\..*).*)',
   ],
 };

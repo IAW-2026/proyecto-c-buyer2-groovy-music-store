@@ -11,6 +11,7 @@ model Usuario {
   clerk_id             String      @id
   nombre               String
   mail                 String
+  activo               Boolean     @default(true)
   
   direcciones          Direccion[]
   carritos             Carrito[]

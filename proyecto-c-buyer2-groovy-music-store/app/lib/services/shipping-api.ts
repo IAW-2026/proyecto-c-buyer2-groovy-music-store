@@ -1,8 +1,8 @@
 
 'use server'
 import { ShippingEstimate, ShipmentResponse } from '../definitions';
-import { simularCalculoEnvio, mockShipments} from '../placeholder-data';
 import { SignJWT } from "jose";
+import { getUuidDeOrden } from '../actions/actions-order';
 
 const SHIPPING_API_URL = process.env.NEXT_PUBLIC_SHIPPING_API_URL;
 
@@ -67,27 +67,58 @@ export async function getShippingEstimate(
 
 
 
-
-
-
-
-
-export async function getShipmentTracking(orderId: string): Promise<ShipmentResponse | null> {
-    // 1. Simulamos el tiempo de espera de una API real (800ms)
-    await new Promise(resolve => setTimeout(resolve, 800));
-
-    // 2. Simulamos la llamada GET /api/shipments?orderId=:orderId
-    const shipment = mockShipments[orderId];
-
-    // Si no está en el mock, devolvemos uno genérico 
-    if (!shipment) {
-        return {
-            id: `mock_ext_${orderId}`,
-            codigoSeguimiento: `TRK-${Math.floor(Math.random() * 1000000)}`,
-            estado: "en_transito",
-            fechaEntregaEstimada: "2026-06-02T00:00:00Z"
-        };
+export async function getShipmentTracking(displayOrderId: string): Promise<ShipmentResponse | null> {
+  try {
+    
+    const orderUuid = await getUuidDeOrden(displayOrderId);
+    
+    
+    if (!orderUuid) {
+      console.error(`No se encontró el UUID para la orden: ${displayOrderId}`);
+      return null;
     }
 
-    return shipment;
+    const secret = new TextEncoder().encode(process.env.SHIPPING_JWT_SECRET);
+    
+    const token = await new SignJWT({ 
+      tipo: "usuario", 
+      role: "admin" 
+    })
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime("2m")
+      .sign(secret);
+
+    
+    const response = await fetch(`${SHIPPING_API_URL}/api/shipments?orderId=${orderUuid}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      cache: 'no-store',
+    });
+
+    if (response.status === 404) {
+      return null;
+    }
+
+    if (!response.ok) {
+      throw new Error(`Error en la API de envíos. Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      id: data.id,
+      codigoSeguimiento: data.codigoSeguimiento, 
+      estado: data.estado,
+      fechaEntregaEstimada: data.fechaEntregaEstimada, 
+      empresa: data.empresa, 
+    };
+
+  } catch (error) {
+    console.error("Error al obtener el seguimiento del envío:", error);
+    return null;
+  }
 }

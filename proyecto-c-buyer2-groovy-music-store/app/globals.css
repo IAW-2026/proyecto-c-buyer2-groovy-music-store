@@ -9,12 +9,13 @@
   --accent-terracotta-dark: #B83A15; 
   --panel-bg: #FAF8F5;
   --divider: #DCDCDC;
+
 }
 
 @theme {
   --color-background: var(--bg-retro);
   --color-foreground: var(--text-dark);
-  --color-primary: var(--accent-terracotta);
+  --color-primary: var(--accent-terracotta-dark);
   --color-primary-dark: var(--accent-terracotta-dark);
   --color-card: var(--panel-bg);
   --color-border: var(--divider);
@@ -22,6 +23,7 @@
   --font-cormorant: var(--font-cormorant);
   --font-syne: var(--font-syne);
   --font-dm: var(--font-dm);
+
 }
 
 body {

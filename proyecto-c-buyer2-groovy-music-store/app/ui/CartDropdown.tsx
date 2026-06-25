@@ -100,6 +100,7 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                     <div className="overflow-y-auto p-4 flex flex-col gap-5 relative">
                         {mostrarAviso && cartItems.length > 0 && Object.keys(groupedCart).length > 1 && (
                             <div className="relative bg-[#f8f9fa] border border-border rounded-lg p-3 pr-8 text-[12px] text-foreground/80 font-dm shadow-sm">
+                                <button 
                                     onClick={() => setMostrarAviso(false)} 
                                     className="absolute top-2 right-2 text-foreground/40 hover:text-foreground p-1"
                                     aria-label="Cerrar aviso de múltiples vendedores"

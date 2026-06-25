@@ -81,8 +81,7 @@ export async function getShipmentTracking(displayOrderId: string): Promise<Shipm
     const secret = new TextEncoder().encode(process.env.SHIPPING_JWT_SECRET);
     
     const token = await new SignJWT({ 
-      tipo: "usuario", 
-      role: "admin" 
+      tipo: "usuario"
     })
       .setProtectedHeader({ alg: "HS256" })
       .setIssuedAt()

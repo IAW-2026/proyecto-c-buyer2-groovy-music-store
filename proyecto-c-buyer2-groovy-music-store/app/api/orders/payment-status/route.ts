@@ -33,6 +33,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'not_found', mensaje: 'La orden no existe' }, { status: 404 });
     }
 
+    // Control de idempotencia: ignoramos webhooks duplicados si la orden ya fue procesada. 
+    // Se retorna 200 para detener los reintentos de la pasarela de pagos.
+    if (
+        orden.estado === EstadoOrden.PAGO_APROBADO || 
+        orden.estado === EstadoOrden.PAGO_RECHAZADO || 
+        orden.estado === EstadoOrden.CANCELADO
+    ) {
+        console.log(`El webhook de la orden ${ordenId} ya fue procesado previamente. Ignorando.`);
+        return NextResponse.json({ 
+            estado: 'ya_procesada', 
+            mensaje: 'La orden ya fue actualizada previamente' 
+        }, { status: 200 }); 
+    }
+
     // Mapeo de estados internos del Enum
     let nuevoEstadoInterno: EstadoOrden;
     if (estado === 'aprobado') nuevoEstadoInterno = EstadoOrden.PAGO_APROBADO;

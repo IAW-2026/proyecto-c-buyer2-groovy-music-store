@@ -4,6 +4,7 @@ import { ArrowRightEndOnRectangleIcon, UserCircleIcon, UserPlusIcon } from '@her
 import CartServer from '@/app/ui/CartServer'
 import SearchBar from '@/app/ui/SearchBar'
 import Link from 'next/link'
+import SignInDropdown from '@/app/ui/SignInDropdown' 
 
 export default async function NavBar() {
     const { userId } = await auth();
@@ -44,10 +45,9 @@ export default async function NavBar() {
                     </>
                 ) : (
                     <>
-                        <Link href="/sign-in" className={navItemClass} aria-label="Iniciar sesión">
-                            <UserCircleIcon className="w-5 h-5" aria-hidden="true" />
-                            <span className={textClass}>Ingresar</span>
-                        </Link>
+                        {/* DROPDOWN */}
+                        <SignInDropdown navItemClass={navItemClass} textClass={textClass} />
+
                         <Link href="/sign-up" className={navItemClass} aria-label="Registrarse">
                             <UserPlusIcon className="w-5 h-5" aria-hidden="true" />
                             <span className={textClass}>Registrarse</span>

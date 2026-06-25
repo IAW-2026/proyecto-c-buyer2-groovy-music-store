@@ -37,11 +37,17 @@ export default clerkMiddleware(async (auth, req) => {
   // 2. Lógica de Clerk
   const { sessionClaims } = await auth();
 
+
+
   if (isAdminRoute(req)) {
-    if (sessionClaims?.roles !== 'admin') {
-      return NextResponse.redirect(new URL('/', req.url));
-    }
+  const userRoles = (sessionClaims?.roles as string[]) || [];
+  
+  const hasAccess = userRoles.some(role => ['admin', 'super_admin'].includes(role));
+
+  if (!hasAccess) {
+    return NextResponse.redirect(new URL('/', req.url));
   }
+}
 
   if (!isPublicRoute(req)) {
     await auth.protect();

@@ -1,16 +1,16 @@
 import { SignOutButton } from "@clerk/nextjs"
 import { auth } from "@clerk/nextjs/server"
-import { ArrowRightEndOnRectangleIcon, UserCircleIcon, UserPlusIcon } from '@heroicons/react/24/outline'
+import { ArrowRightEndOnRectangleIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import CartServer from '@/app/ui/CartServer'
 import SearchBar from '@/app/ui/SearchBar'
 import Link from 'next/link'
 import SignInDropdown from '@/app/ui/SignInDropdown' 
+import SignUpDropdown from '@/app/ui/SignUpDropdown'
 
 export default async function NavBar() {
     const { userId } = await auth();
 
-    // CLASES MAESTRAS: "group" permite que el texto se expanda al pasar el mouse. 
-    // "hover:bg-white/10" da el fondo sutil luminoso.
+
     const navItemClass = "group flex items-center p-2 bg-transparent hover:bg-white/10 rounded-full transition-all duration-300 ease-in-out cursor-pointer text-white border border-transparent";
     const textClass = "hidden md:block max-w-0 opacity-0 overflow-hidden whitespace-nowrap group-hover:max-w-[120px] group-hover:opacity-100 group-hover:ml-2 transition-all duration-300 ease-in-out text-[11px] font-bold tracking-widest uppercase";
 
@@ -24,7 +24,7 @@ export default async function NavBar() {
             </div>
 
             <div className="flex items-center gap-1 md:gap-2 ml-auto">
-                {/* Búsqueda (Se expande al hacer hover, se abre al hacer clic) */}
+                {/* Búsqueda  */}
                 <SearchBar />
 
                 {userId ? (
@@ -45,13 +45,9 @@ export default async function NavBar() {
                     </>
                 ) : (
                     <>
-                        {/* DROPDOWN */}
+                        {/* DROPDOWNS*/}
                         <SignInDropdown navItemClass={navItemClass} textClass={textClass} />
-
-                        <Link href="/sign-up" className={navItemClass} aria-label="Registrarse">
-                            <UserPlusIcon className="w-5 h-5" aria-hidden="true" />
-                            <span className={textClass}>Registrarse</span>
-                        </Link>
+                        <SignUpDropdown navItemClass={navItemClass} textClass={textClass} />
                     </>
                 )}
             </div>

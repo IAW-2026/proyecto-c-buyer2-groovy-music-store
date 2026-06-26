@@ -70,12 +70,12 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
                         </h1>
                         
                         {product.artista && (
-                            <p className="font-dm text-xl text-foreground/70 mb-6">
+                            <p className="font-dm text-xl text-foreground/70 mb-4">
                                 {product.artista}
                             </p>
                         )}
-                        
-                        <div className="font-syne text-3xl font-semibold text-foreground mb-8">
+
+                        <div className="font-syne text-3xl font-semibold text-foreground mb-8 mt-4">
                             ${(product.precio || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
                         </div>
                         

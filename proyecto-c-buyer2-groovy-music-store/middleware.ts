@@ -35,10 +35,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 2. Lógica de Clerk
   const { sessionClaims } = await auth();
-  // AGREGAR ESTO TEMPORALMENTE
-  console.log("=== DEBUG MIDDLEWARE ===");
-  console.log("Ruta solicitada:", req.nextUrl.pathname);
-  console.log("Session Claims:", JSON.stringify(sessionClaims, null, 2));
+  
 
  if (isAdminRoute(req)) {
   const roles = sessionClaims?.roles as string[] | undefined;

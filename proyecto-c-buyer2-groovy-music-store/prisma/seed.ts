@@ -1,115 +1,144 @@
 import { PrismaClient } from '@prisma/client';
+import {
+  SELLER_ID,
+  BUYERS,
+  DIRECCIONES,
+  PRODUCTOS,
+  ORDENES,
+  ENVIO_IDS,
+} from './contrato-datos';
 
 const prisma = new PrismaClient();
 
-// IDs consistentes con tu placeholder-data
-const P_BEATLES = '123e4567-e89b-12d3-a456-426614174009'; // Seller 123
-const P_TAYLOR = '123e4567-e89b-12d3-a456-426614174010';  // Seller 123
-const P_SODA = '123e4567-e89b-12d3-a456-426614174011';    // Seller 456
+// estado_global del contrato -> Orden.estado real de Buyer.
+// Usamos los strings literales que esta app YA acepta en sus propios webhooks
+// (payment-status y shipping-status) — no el enum EstadoOrden a secas: para
+// "despachado / en preparación logística" el webhook de shipping-status espera
+// literalmente "Pendiente de envio", no "Envío en preparación" como dice
+// definitions.ts. Quedaron desalineados entre sí; usamos el que valida la ruta real.
+const MAPA_ESTADO: Record<string, string> = {
+  RESERVADO: "Procesando",
+  PAGO_FALLIDO: "Pago Rechazado",
+  PREPARANDO_PENDIENTE: "Pago Aprobado",
+  PREPARANDO: "Pago Aprobado",
+  LISTO_PARA_ENVIO: "Pago Aprobado",
+  ENVIADO_EN_PREPARACION: "Pendiente de envio",
+  EN_CAMINO: "En camino",
+  ENTREGADO: "Entregado",
+};
 
 async function main() {
-  console.log("Limpiando base de datos...");
-  await prisma.itemOrden.deleteMany({});
-  await prisma.orden.deleteMany({});
-  await prisma.itemCarrito.deleteMany({});
-  await prisma.carrito.deleteMany({});
-  await prisma.direccion.deleteMany({});
-  await prisma.usuario.deleteMany({});
+  console.log("🌱 Iniciando seed de Buyer...");
 
-  console.log("Comenzando el seeding...");
+  await prisma.itemOrden.deleteMany();
+  await prisma.orden.deleteMany();
+  await prisma.itemCarrito.deleteMany();
+  await prisma.carrito.deleteMany();
+  await prisma.direccion.deleteMany();
+  await prisma.usuario.deleteMany();
 
-  // --- USUARIO 1: Buyer (El protagonista de la demo) ---
-  const user1 = await prisma.usuario.create({
-    data: {
-      clerk_id: 'user_3EYEzILbnG1u5nBVAItSCkgSWZ4',
-      nombre: 'Buyer',
-      mail: 'buyer+clerktest@iaw.com',
-    }
-  });
+  console.log("✓ Tablas limpiadas");
 
-  const dir1_casa = await prisma.direccion.create({
-    data: {
-      clerk_id: user1.clerk_id,
-      calle: 'Av. Alem 1234',
-      ciudad: 'Bahía Blanca',
-      provincia: 'Buenos Aires',
-      cod_postal: '8000',
-      pais: 'Argentina'
-    }
-  });
+  // ─── Usuarios + direcciones ────────────────────────────────────────────
+  const direccionPorBuyer: Record<string, string> = {};
 
-  const dir1_trabajo = await prisma.direccion.create({
-    data: {
-      clerk_id: user1.clerk_id,
-      calle: 'Donado 50',
-      ciudad: 'Bahía Blanca',
-      provincia: 'Buenos Aires',
-      cod_postal: '8000',
-      pais: 'Argentina'
-    }
-  });
+  for (const buyer of BUYERS) {
+    await prisma.usuario.create({
+      data: {
+        clerk_id: buyer.id,
+        nombre: buyer.nombre,
+        mail: buyer.mail,
+        // Uno de los compradores de fondo queda ya suspendido, para que el
+        // Control Plane (PATCH /api/users/:id) tenga algo real para reactivar,
+        // además de poder suspender a otro en vivo durante la demo.
+        activo: buyer.id !== "user_mock_buyer_006",
+      },
+    });
+
+    const dir = DIRECCIONES[buyer.id];
+    const direccion = await prisma.direccion.create({
+      data: {
+        clerk_id: buyer.id,
+        calle: dir.calle,
+        ciudad: dir.ciudad,
+        provincia: dir.provincia,
+        cod_postal: dir.cod_postal,
+        pais: dir.pais,
+      },
+    });
+    direccionPorBuyer[buyer.id] = direccion.id;
+  }
+
+  console.log(`✓ ${BUYERS.length} usuarios creados (1 suspendido: user_mock_buyer_006)`);
+
+  // ─── Carrito de ejemplo para el buyer real (demo en vivo) ───────────────
+  const buyerReal = BUYERS.find((b) => b.real)!;
+  const prod1 = PRODUCTOS.find((p) => p.titulo === "A Love Supreme")!;
+  const prod2 = PRODUCTOS.find((p) => p.titulo === "Goodbye Yellow Brick Road")!;
 
   await prisma.carrito.create({
     data: {
-      clerk_id: user1.clerk_id,
+      clerk_id: buyerReal.id,
       items: {
         create: [
-          { producto_id: P_BEATLES, cantidad: 1, id_seller: 'clerk_123' },
-          { producto_id: P_SODA, cantidad: 1, id_seller: 'clerk_456' }
-        ]
-      }
-    }
-  });
-
-  await prisma.orden.createMany({
-    data: [
-      {
-        monto: 95410,
-        estado: 'entregado',
-        empresa_envio: 'OCA',
-        id_buyer: user1.clerk_id,
-        id_direccion: dir1_casa.id,
-        id_seller: 'clerk_123'
+          { producto_id: prod1.id, cantidad: 1, id_seller: SELLER_ID },
+          { producto_id: prod2.id, cantidad: 2, id_seller: SELLER_ID },
+        ],
       },
-      {
-        monto: 97900,
-        estado: 'en_transito',
-        empresa_envio: 'Andreani',
-        id_buyer: user1.clerk_id,
-        id_direccion: dir1_trabajo.id,
-        id_seller: 'clerk_123'
+    },
+  });
+
+  console.log("✓ Carrito de ejemplo creado para el buyer real");
+
+  // ─── Órdenes, a partir del mismo libro de órdenes que usa Seller ────────
+  let creadas = 0;
+
+  for (const orden of ORDENES) {
+    const fecha = new Date(Date.now() - orden.dias_atras * 86_400_000);
+
+    // empresa_envio: el checkout real siempre lo fija en "Logística Standard"
+    // y nada lo actualiza después (gap de wiring, no es algo que rompamos
+    // nosotros). Para la demo, una vez que la orden tiene un envío real en
+    // Shipping, mostramos la empresa real para que coincida con lo que se ve
+    // ahí — si no, antes de despachar, se queda en el valor real de checkout.
+    const empresaEnvio = ENVIO_IDS[orden.id] ? orden.empresa_envio : "Logística Standard";
+
+    await prisma.orden.create({
+      data: {
+        nro_orden: orden.id,
+        monto: orden.monto_total,
+        estado: MAPA_ESTADO[orden.estado_global],
+        fecha,
+        empresa_envio: empresaEnvio,
+        id_buyer: orden.buyer_id,
+        id_seller: SELLER_ID,
+        id_direccion: direccionPorBuyer[orden.buyer_id],
+        items: {
+          create: orden.items.map((it) => ({
+            producto_id: it.product_id,
+            cantidad: it.cantidad,
+            precio_unit: it.precio_unit,
+          })),
+        },
       },
-      {
-        monto: 55000,
-        estado: 'pendiente',
-        empresa_envio: 'Correo Argentino',
-        id_buyer: user1.clerk_id,
-        id_direccion: dir1_casa.id,
-        id_seller: 'clerk_456'
-      }
-    ]
-  });
+    });
+    creadas++;
+  }
 
-  // --- USUARIO 2: Juan Perez ---
-  const user2 = await prisma.usuario.create({
-    data: { clerk_id: 'clerk_123_test', nombre: 'Juan Perez', mail: 'juan@test.com' }
-  });
-  const dir2 = await prisma.direccion.create({
-    data: { clerk_id: user2.clerk_id, calle: 'Calle Falsa 123', ciudad: 'CABA', provincia: 'CABA', cod_postal: '1000', pais: 'Argentina' }
-  });
-  await prisma.orden.create({
-    data: {
-      monto: 55000,
-      estado: 'entregado',
-      empresa_envio: 'OCA',
-      id_buyer: user2.clerk_id,
-      id_direccion: dir2.id,
-      id_seller: 'clerk_456',
-      items: { create: [{ producto_id: P_SODA, cantidad: 1, precio_unit: 55000 }] }
-    }
-  });
+  console.log(`✓ ${creadas} órdenes creadas`);
 
-  console.log("Seeding finalizado correctamente (sin Admin).");
+  // ─── Resumen ──────────────────────────────────────────────────────────
+  const porEstado = await prisma.orden.groupBy({ by: ["estado"], _count: { _all: true } });
+  const totalGastado = await prisma.orden.aggregate({ _sum: { monto: true } });
+
+  console.log("");
+  console.log("📊 Resumen del seed:");
+  console.log(`   Usuarios:  ${BUYERS.length}`);
+  console.log(`   Órdenes:   ${creadas}`);
+  for (const g of porEstado) console.log(`     - ${g.estado}: ${g._count._all}`);
+  console.log(`   Monto total acumulado: $${(totalGastado._sum.monto ?? 0).toLocaleString("es-AR")}`);
+  console.log("");
+  console.log("✅ Seed completado. Login real: buyer+clerktest@iaw.com");
 }
 
 main()

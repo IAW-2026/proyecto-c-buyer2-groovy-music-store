@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import { actualizarCantidadItemBD, eliminarItemBD } from '@/app/lib/actions/actions-cart';
 import type { HydratedCartItem } from '@/app/lib/definitions';
-import { CartSellerGroup } from './CartSellerGroup'; // Ajustá el import 
+import { CartSellerGroup } from './CartSellerGroup';
 
 interface CartDropdownProps {
     items: HydratedCartItem[];
@@ -75,9 +75,11 @@ export default function CartDropdown({ items }: CartDropdownProps) {
             <button 
                 onClick={() => setIsOpen(!isOpen)}
                 className="group flex items-center p-2 bg-transparent hover:bg-white/15 active:bg-white/20 rounded-full transition-all duration-300 ease-in-out border-none text-white cursor-pointer"
+                aria-label="Abrir carrito de compras"
+                aria-expanded={isOpen}
             >
                 <div className="relative flex items-center justify-center text-white/90 group-hover:text-white">
-                    <ShoppingCartIcon className="w-5 h-5" />
+                    <ShoppingCartIcon className="w-5 h-5" aria-hidden="true" />
                     {totalItems > 0 && (
                         <span className="absolute -top-1.5 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[#2E2E2E] text-[10px] font-bold text-white border border-primary/50">
                             {totalItems}
@@ -98,8 +100,12 @@ export default function CartDropdown({ items }: CartDropdownProps) {
                     <div className="overflow-y-auto p-4 flex flex-col gap-5 relative">
                         {mostrarAviso && cartItems.length > 0 && Object.keys(groupedCart).length > 1 && (
                             <div className="relative bg-[#f8f9fa] border border-border rounded-lg p-3 pr-8 text-[12px] text-foreground/80 font-dm shadow-sm">
-                                <button onClick={() => setMostrarAviso(false)} className="absolute top-2 right-2 text-foreground/40 hover:text-foreground p-1">
-                                    <XMarkIcon className="w-4 h-4" />
+                                <button 
+                                    onClick={() => setMostrarAviso(false)} 
+                                    className="absolute top-2 right-2 text-foreground/40 hover:text-foreground p-1"
+                                    aria-label="Cerrar aviso de múltiples vendedores"
+                                >
+                                    <XMarkIcon className="w-4 h-4" aria-hidden="true" />
                                 </button>
                                 <strong>Nota:</strong> Los productos están agrupados porque pertenecen a distintos vendedores. Deberás iniciar la compra de cada grupo por separado.
                             </div>

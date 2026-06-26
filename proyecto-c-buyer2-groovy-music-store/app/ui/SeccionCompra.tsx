@@ -8,6 +8,13 @@ interface SeccionCompraProps {
     stockDisponibleInicial: number
 }
 
+// Función para limpiar los guiones bajos y poner la primera en mayúscula
+function formatToSentenceCase(str: string | null | undefined): string {
+    if (!str) return '';
+    const lowerWithSpaces = str.replace(/_/g, ' ').toLowerCase();
+    return lowerWithSpaces.charAt(0).toUpperCase() + lowerWithSpaces.slice(1);
+}
+
 export default function SeccionCompra({ product, stockDisponibleInicial }: SeccionCompraProps) {
 
     const [stockDisponible, setStockDisponible] = useState(stockDisponibleInicial)
@@ -22,14 +29,16 @@ export default function SeccionCompra({ product, stockDisponibleInicial }: Secci
                 </div>
                 <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-foreground font-medium">Condición</span>
-                    <span className="font-bold text-foreground">{product.condicion}</span>
+                    
+                    <span className="font-bold text-foreground">{formatToSentenceCase(product.condicion)}</span>
                 </div>
                 <div className="flex justify-between border-b border-border pb-2">
                     <span className="text-foreground font-medium">Género</span>
+                    
                     <span className="font-bold text-foreground">{product.genero}</span>
                 </div>
                 
-                {/* Este número ahora se actualiza dinámicamente */}
+                
                 <div className="flex justify-between">
                     <span className="text-foreground font-medium">Disponibilidad</span>
                     <span className={`font-bold tracking-wide ${stockDisponible > 0 ? 'text-green-800' : 'text-[#B83A15]'}`}>

@@ -56,7 +56,7 @@ export default async function EstadoOrdenPage({ params }: { params: Promise<{ or
                         <p className="text-md text-foreground/60 mb-6">
                             No te preocupes, no se realizó ningún cargo técnico y conservamos tus productos de vuelta en el carrito.
                         </p>
-                        <Link href="/carrito" className="inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition">
+                        <Link href="/catalogo" className="inline-block bg-red-600 text-white px-8 py-3 rounded-lg hover:bg-red-700 transition">
                             Volver al Carrito
                         </Link>
                     </div>

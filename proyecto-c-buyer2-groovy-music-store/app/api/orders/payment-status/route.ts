@@ -10,6 +10,8 @@ const UpdateOrderSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  let ordenId: string | undefined;
+
   try {
     const body = await request.json();
     const validation = UpdateOrderSchema.safeParse(body);
@@ -18,9 +20,35 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'bad_request', detalles: validation.error.format() }, { status: 400 });
     }
 
-    const { ordenId, estado } = validation.data;
+    ordenId = validation.data.ordenId;
+    const { estado } = validation.data;
 
-    // Buscamos la orden 
+    let nuevoEstadoInterno: EstadoOrden;
+    if (estado === 'aprobado') nuevoEstadoInterno = EstadoOrden.PAGO_APROBADO;
+    else if (estado === 'rechazado') nuevoEstadoInterno = EstadoOrden.PAGO_RECHAZADO;
+    else if (estado === 'cancelado') nuevoEstadoInterno = EstadoOrden.CANCELADO;
+    else nuevoEstadoInterno = EstadoOrden.PROCESANDO;
+
+    // Update atómico: evita concurrencia actualizando solo si sigue en PROCESANDO
+    const transaccion = await prisma.orden.updateMany({
+      where: { 
+        nro_orden: ordenId,
+        estado: EstadoOrden.PROCESANDO 
+      },
+      data: { 
+        estado: nuevoEstadoInterno 
+      }
+    });
+
+    // Idempotencia: corta la ejecución si otro webhook ya actualizó la orden
+    if (transaccion.count === 0) {
+      console.log(`Idempotencia: Webhook ignorado para orden ${ordenId}.`);
+      return NextResponse.json({ 
+        estado: 'ya_procesada', 
+        mensaje: 'La orden ya está siendo procesada por otro evento' 
+      }, { status: 200 }); 
+    }
+
     const orden = await prisma.orden.findUnique({
       where: { nro_orden: ordenId },
       include: { 
@@ -33,14 +61,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'not_found', mensaje: 'La orden no existe' }, { status: 404 });
     }
 
-    // Mapeo de estados internos del Enum
-    let nuevoEstadoInterno: EstadoOrden;
-    if (estado === 'aprobado') nuevoEstadoInterno = EstadoOrden.PAGO_APROBADO;
-    else if (estado === 'rechazado') nuevoEstadoInterno = EstadoOrden.PAGO_RECHAZADO;
-    else if (estado === 'cancelado') nuevoEstadoInterno = EstadoOrden.CANCELADO;
-    else nuevoEstadoInterno = EstadoOrden.PROCESANDO;
-
-    // 1. CASO: PAGO APROBADO -> Llamamos a la función de  seller-api
+    // 1. CASO: PAGO APROBADO -> Llamamos a la función de seller-api
     if (estado === 'aprobado') {
       await confirmarOrden({
         order_id: orden.nro_orden,
@@ -59,12 +80,6 @@ export async function POST(request: NextRequest) {
           pais: orden.direccion.pais
         }
       });
-
-      // Si la función no lanzó error, actualizamos el estado local de la orden
-      await prisma.orden.update({
-        where: { nro_orden: ordenId },
-        data: { estado: nuevoEstadoInterno },
-      });
     }
 
     // 2. CASO: PAGO RECHAZADO O CANCELADO -> Liberamos stock externo y restauramos carrito
@@ -77,13 +92,6 @@ export async function POST(request: NextRequest) {
         }))
       });
 
-      // Modificamos el estado en tu base de datos
-      await prisma.orden.update({
-        where: { nro_orden: ordenId },
-        data: { estado: nuevoEstadoInterno },
-      });
-
-      // Restauramos los ítems en el carrito usando prisma
       const carritoUsuario = await prisma.carrito.findFirst({
         where: { clerk_id: orden.id_buyer }
       });
@@ -109,7 +117,20 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error("Error en  API de actualización de orden:", error);
+    console.error("Error en API de actualización de orden:", error);
+    
+    // Rollback: si falla la API del Seller, revertimos a PROCESANDO para permitir reintentos
+    if (ordenId) {
+      try {
+        await prisma.orden.update({
+          where: { nro_orden: ordenId },
+          data: { estado: EstadoOrden.PROCESANDO }
+        });
+      } catch (rollbackError) {
+        console.error("Error al intentar revertir el estado:", rollbackError);
+      }
+    }
+
     return NextResponse.json({ error: 'internal_error', mensaje: error.message || 'Error interno del servidor' }, { status: 500 });
   }
 }

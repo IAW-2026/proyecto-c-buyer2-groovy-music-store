@@ -5,14 +5,17 @@ import { jwtVerify } from "jose";
 const isPublicRoute = createRouteMatcher(['/', '/sign-in(.*)', '/sign-up(.*)', '/catalogo(.*)', '/auth-sync(.*)','/api/orders/cleanup']);
 const isAdminRoute = createRouteMatcher(['/admin(.*)']);
 const isIntegrationApiRoute = createRouteMatcher([
+  //para que usen payments y shipping
   '/api/orders/payment-status', 
   '/api/orders/shipping-status',
-  '/api/analytics(.*)', 
-  '/api/control-plane(.*)'
+  //analytics
+  '/api/analytics(.*)',
+  //control plane 
+  '/api/orders(.*)',
+  '/api/users(.*)'
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  // 1. Validar tokens de integración (Payments y Shipping)
   if (isIntegrationApiRoute(req)) {
     const authHeader = req.headers.get('Authorization');
 
@@ -32,12 +35,15 @@ export default clerkMiddleware(async (auth, req) => {
 
   // 2. Lógica de Clerk
   const { sessionClaims } = await auth();
+  
 
-  if (isAdminRoute(req)) {
-    if (sessionClaims?.roles !== 'admin') {
-      return NextResponse.redirect(new URL('/', req.url));
-    }
+ if (isAdminRoute(req)) {
+  const roles = sessionClaims?.roles as string[] | undefined;
+  const esAdmin = roles?.some(r => ['admin', 'super_admin', 'admin_buyer'].includes(r));
+  if (!esAdmin) {
+    return NextResponse.redirect(new URL('/', req.url));
   }
+}
 
   if (!isPublicRoute(req)) {
     await auth.protect();
@@ -46,12 +52,6 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    /*
-     * Excluye:
-     * - api/orders/cleanup 
-     * - _next (Archivos internos de Next.js)
-     * - Archivos estáticos (imágenes, favicons, etc)
-     */
     '/((?!api/orders/cleanup|_next|.*\\..*).*)',
   ],
 };

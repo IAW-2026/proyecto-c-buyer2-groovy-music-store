@@ -1,0 +1,88 @@
+import Link from 'next/link'
+import { notFound } from 'next/navigation'
+import { ArrowLeftIcon } from '@heroicons/react/24/outline'
+import GaleriaInteractiva from '@/app/ui/GaleriaInteractiva'
+import NavBar from '@/app/ui/NavBar'
+import SeccionCompra from '@/app/ui/SeccionCompra'
+import { getFullProduct } from '@/app/lib/services/seller-api'
+import { auth } from '@clerk/nextjs/server'
+import prisma from '@/app/lib/prisma'
+
+export const metadata = {
+    title: 'Detalle de Producto - Groovy Music Store',
+    description: 'Información detallada del producto',
+}
+
+export default async function ProductDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    
+    const resolvedParams = await params;
+    const product = await getFullProduct(resolvedParams.id);
+
+    if (!product) notFound()
+
+    const { userId } = await auth();
+    let cantidadYaEnCarrito = 0;
+
+    if (userId) {
+        try {
+            const itemExistente = await prisma.itemCarrito.findFirst({
+                where: {
+                    producto_id: product.id,
+                    carrito: { clerk_id: userId }
+                }
+            });
+
+            if (itemExistente) {
+                cantidadYaEnCarrito = itemExistente.cantidad;
+            }
+        } catch (error) {
+            console.error("Error al consultar la cantidad en el carrito local:", error);
+        }
+    }
+
+    const stockDisponible = Math.max(0, product.stock - cantidadYaEnCarrito);
+
+    return (
+        <main className="min-h-screen bg-background font-dm pb-20">
+            <NavBar />
+
+            <div className="flex items-center justify-between px-8 py-3 bg-foreground text-white/80 text-xs font-medium tracking-[0.12em] uppercase border-b border-[#3a3a3a]">
+                <Link 
+                    href="/catalogo" 
+                    className="group flex items-center gap-2 px-5 py-1.5 rounded-full font-bold border-2 bg-[#B83A15] text-white border-[#9C2E0F] shadow-sm hover:bg-[#A33313] hover:scale-105 transition-all duration-300"
+                    aria-label="Volver al catálogo"
+                >
+                    <ArrowLeftIcon className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" aria-hidden="true" />
+                    <span>Volver al catálogo</span>
+                </Link>
+            </div>
+
+            <div className="max-w-5xl mx-auto mt-10 px-6 md:px-12">
+                <div className="bg-card border border-border rounded-xl shadow-sm p-6 md:p-10 flex flex-col md:flex-row gap-10">
+                    
+                    <div className="w-full md:w-1/2">
+                        <GaleriaInteractiva imagenes={product.imagenes} />
+                    </div>
+
+                    <div className="w-full md:w-1/2 flex flex-col">
+                        <h1 className="font-syne text-3xl md:text-4xl font-bold text-foreground mb-2">
+                            {product.titulo}
+                        </h1>
+                        
+                        {product.artista && (
+                            <p className="font-dm text-xl text-foreground/70 mb-4">
+                                {product.artista}
+                            </p>
+                        )}
+
+                        <div className="font-syne text-3xl font-semibold text-foreground mb-8 mt-4">
+                            ${(product.precio || 0).toLocaleString('es-AR', { maximumFractionDigits: 0 })}
+                        </div>
+                        
+                        <SeccionCompra product={product} stockDisponibleInicial={stockDisponible} />
+                    </div>
+                </div>
+            </div>
+        </main>
+    )
+}

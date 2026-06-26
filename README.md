@@ -53,7 +53,7 @@ La aplicación cuenta con su propia API REST y es dueña absoluta de sus datos. 
 **Flujo Demostrable y Checkout (Mercado Pago)**: El sistema cuenta con un flujo completo de fin a fin demostrable en la defensa que se inicia desde la Buyer App. Para completar el pago de prueba en el checkout de Mercado Pago, utilizar las siguientes credenciales de test:
 * **Comprador de test:** `TESTUSER7971489035181850335` (código `965242`)
 * **Tarjeta:** `4002 7686 9439 5619` · Nombre: `APRO` · CVV: `123` · Vencimiento: `11/30` · DNI: `12345678` (pago aprobado). 
-Nombre: `APRO` (Pago rechazado)
+Nombre: `OTHE` (Pago rechazado)
 
 
 **Arquitectura**: Este proyecto implementa una capa de servicios (lib/services/) para gestionar datos externos de forma limpia, manteniendo una persistencia transaccional propia en Neon mediante Prisma.
